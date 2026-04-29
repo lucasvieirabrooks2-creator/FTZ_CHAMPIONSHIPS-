@@ -3,116 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championship - Pro Hub</title>
+    <title>FTz Championship | Pro Platform</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --accent: #7000ff; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
+        :root { --primary: #00f0ff; --bg: #03050a; --card: #0d1117; --danger: #ff4d4d; --accent: #bc13fe; --gold: #ffd700; }
+        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #e6edf3; overflow-x: hidden; }
         
-        nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 12px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); overflow-x: auto; }
-        nav button { background: none; border: none; color: #666; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; white-space: nowrap; transition: 0.3s; }
-        nav button.active { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        /* Navbar Futurista */
+        nav { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: center; gap: 15px; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid var(--primary); backdrop-filter: blur(10px); overflow-x: auto; }
+        nav button { background: none; border: none; color: #8b949e; cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase; transition: 0.4s; padding: 5px 10px; border-radius: 5px; }
+        nav button.active { color: var(--primary); background: rgba(0, 240, 255, 0.1); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.2); }
 
-        .container { padding: 20px; max-width: 600px; margin: auto; }
-        .page { display: none; animation: fadeIn 0.4s ease; }
+        .container { padding: 20px; max-width: 800px; margin: auto; }
+        .page { display: none; animation: slideIn 0.5s ease-out; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 
-        .card { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; }
-        h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-        
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 5px; text-decoration: none; display: block; text-align: center; }
-        
-        /* Grid de Times e Partidas */
-        .grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .match-card { background: linear-gradient(to right, #111827, #1a2236); border-left: 4px solid var(--accent); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
-        .match-vs { font-size: 18px; font-weight: bold; color: var(--primary); display: flex; justify-content: space-around; align-items: center; }
-        
-        .team-box { background: #000; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid #1e293b; }
-        .team-box img { width: 50px; height: 50px; object-fit: contain; }
+        /* Estilo dos Cards */
+        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h1, h2, h3 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
 
-        .search-bar { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,240,255,0.1); margin-bottom: 20px; }
-        
-        .player-row { display: flex; align-items: center; gap: 12px; background: #161d2f; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid transparent; }
-        .player-row:hover { border-color: var(--primary); }
-        .player-row img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--primary); }
+        /* Inputs Gamer */
+        input, select, textarea { width: 100%; padding: 14px; margin: 10px 0; border-radius: 8px; border: 1px solid #30363d; background: #161b22; color: #fff; font-family: inherit; }
+        .btn { background: var(--primary); color: #000; padding: 15px; border: none; border-radius: 8px; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn:hover { filter: brightness(1.2); box-shadow: 0 0 20px var(--primary); }
+
+        /* Player Cards - Estilo Pro */
+        .player-card { background: linear-gradient(145deg, #0d1117, #161b22); border-radius: 20px; padding: 20px; position: relative; border: 1px solid #30363d; margin-bottom: 15px; transition: 0.3s; }
+        .player-header { display: flex; align-items: center; gap: 15px; }
+        .player-img { width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .medals { display: flex; gap: 5px; margin-top: 5px; }
+        .medal-icon { font-size: 18px; filter: drop-shadow(0 0 5px var(--gold)); }
+
+        /* Grid de Times */
+        .teams-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .team-box { background: #161b22; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
+        .team-box:hover { border-color: var(--primary); transform: scale(1.05); }
+        .team-box img { width: 60px; height: 60px; object-fit: contain; }
+
+        /* Widget de Stream */
+        .stream-box { background: #000; border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <nav>
-    <button onclick="showPage('home')" id="btn-home" class="active">Home</button>
+    <button onclick="showPage('home')" id="btn-home" class="active">News</button>
     <button onclick="showPage('times')" id="btn-times">Times</button>
-    <button onclick="showPage('partidas')" id="btn-partidas">Partidas</button>
     <button onclick="showPage('tabela')" id="btn-tabela">Ranking</button>
-    <button onclick="showPage('admin')" id="btn-admin">ADM</button>
+    <button onclick="showPage('cadastro')" id="btn-cadastro">Registro</button>
+    <button onclick="showPage('admin')" id="btn-admin">Master</button>
 </nav>
 
 <div class="container">
+    
     <div id="home" class="page active">
-        <h1>FTz Championships</h1>
-        <div id="listaNews"></div>
-        <button class="btn" style="background: var(--accent); color: white;" onclick="showPage('cadastro')">REGISTRAR MEU PERFIL</button>
-    </div>
-
-    <div id="cadastro" class="page">
-        <h2>Criar Atleta</h2>
-        <div class="card">
-            <input id="pNome" placeholder="Seu Nick">
-            <input id="pTime" placeholder="Nome da Equipe">
-            <input id="pUbi" placeholder="ID Tracker.gg">
-            <input id="pFotoURL" placeholder="URL da sua Foto (Opcional)">
-            <input id="pEscudoURL" placeholder="URL do Escudo (Opcional)">
-            <button class="btn" onclick="salvarPerfil()">SOLICITAR REGISTRO</button>
-        </div>
+        <div class="stream-box">● AO VIVO: FTz Championship Series</div>
+        <h1>Últimas Notícias</h1>
+        <div id="feedNews"></div>
     </div>
 
     <div id="times" class="page">
-        <h2>Organizações</h2>
-        <input type="text" id="buscaTime" class="search-bar" placeholder="🔍 Buscar equipe..." onkeyup="filtrarTimes()">
-        <div id="gridTimes" class="grid-half"></div>
-    </div>
-
-    <div id="partidas" class="page">
-        <h2>Confrontos do Dia</h2>
-        <div id="listaMatches"></div>
+        <h2>Organizações Registradas</h2>
+        <div id="gridTimes" class="teams-container"></div>
+        <hr style="border: 0.5px solid #30363d; margin: 30px 0;">
+        <h3 id="tituloLineup">Selecione um time para ver a Line-up</h3>
+        <div id="listaLineup"></div>
     </div>
 
     <div id="tabela" class="page">
-        <h2>Classificação</h2>
-        <input type="text" id="buscaPlayer" class="search-bar" placeholder="🔍 Buscar jogador..." onkeyup="filtrarPlayers()">
-        <div id="listaAtletas"></div>
+        <h2>Classificação Geral</h2>
+        <div class="card">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="color: var(--primary); font-size: 12px; text-align: left;">
+                        <th>POS</th><th>PLAYER</th><th>VITÓRIAS</th><th>PONTOS</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="cadastro" class="page">
+        <h2>Criar Perfil de Atleta</h2>
+        <div class="card">
+            <input id="pNome" placeholder="Nickname Oficial">
+            <input id="pTime" placeholder="Tag do Time (Ex: FTz)">
+            <input id="pUbi" placeholder="ID do Tracker.gg">
+            <input id="pFotoURL" placeholder="Link da Foto de Perfil">
+            <input id="pEscudoURL" placeholder="Link do Logo do Time">
+            <button class="btn" onclick="solicitarPerfil()">ENVIAR PARA O ADM</button>
+        </div>
     </div>
 
     <div id="admin" class="page">
-        <h1>Painel Geral</h1>
+        <h1>Painel de Controle</h1>
         <div class="card">
-            <input type="password" id="adminSenha" placeholder="Senha Master">
+            <input type="password" id="adminSenha" placeholder="Senha Mestra">
             
+            <div class="card" style="border-color: var(--primary);">
+                <h3>Gerenciar Atletas</h3>
+                <div id="adminAtletas"></div>
+            </div>
+
             <div class="card" style="border-color: var(--accent);">
-                <h3>Marcar Partida</h3>
-                <input id="mTime1" placeholder="Time 1 (Nome)">
-                <input id="mTime2" placeholder="Time 2 (Nome)">
-                <input id="mHora" placeholder="Horário (Ex: 21:30)">
-                <button class="btn" style="background: var(--accent); color: white;" onclick="marcarPartida()">AGENDAR JOGO</button>
-            </div>
-
-            <div class="card">
-                <h3>Gerenciar Jogadores</h3>
-                <div id="listaAdminAtletas"></div>
-            </div>
-
-            <div class="card">
-                <h3>Excluir Partidas</h3>
-                <div id="adminListaMatches"></div>
+                <h3>Postar Comunicado</h3>
+                <textarea id="newsTxt" placeholder="Novidade importante..."></textarea>
+                <button class="btn" style="background: var(--accent); color:#fff;" onclick="postarAviso()">PUBLICAR</button>
             </div>
         </div>
     </div>
+
 </div>
 
 <script>
+    // CONFIGURAÇÃO DO SEU FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
         authDomain: "ftzchampionships.firebaseapp.com",
@@ -122,123 +131,126 @@
         messagingSenderId: "241465233774",
         appId: "1:241465233774:web:877740ce39f06443acf17f"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function showPage(pageId) {
+    const IMG_USER = "https://i.imgur.com/89SByG1.png";
+    const IMG_TEAM = "https://i.imgur.com/6E6v4pL.png";
+
+    function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        document.getElementById('btn-'+pageId).classList.add('active');
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-'+id).classList.add('active');
     }
 
-    function salvarPerfil() {
+    function solicitarPerfil() {
         const nome = document.getElementById('pNome').value;
-        if(!nome) return alert("Nick é obrigatório!");
+        if(!nome) return alert("Nickname é obrigatório!");
         db.ref('inscricoes/').push({
             nome, ubiID: document.getElementById('pUbi').value,
             time: (document.getElementById('pTime').value || "FREE AGENT").toUpperCase(),
-            fotoURL: document.getElementById('pFotoURL').value || "https://i.imgur.com/89SByG1.png",
-            escudoURL: document.getElementById('pEscudoURL').value || "https://i.imgur.com/6E6v4pL.png",
-            status: "pendente", wins: 0
-        }).then(() => { alert("Perfil enviado!"); showPage('home'); });
+            fotoURL: document.getElementById('pFotoURL').value || IMG_USER,
+            escudoURL: document.getElementById('pEscudoURL').value || IMG_TEAM,
+            status: "pendente", wins: 0, medals: ""
+        }).then(() => alert("Perfil em análise!"));
     }
 
-    // ADM FUNÇÕES
-    function marcarPartida() {
-        const t1 = document.getElementById('mTime1').value;
-        const t2 = document.getElementById('mTime2').value;
-        const hora = document.getElementById('mHora').value;
-        if(t1 && t2) db.ref('partidas/').push({ t1, t2, hora });
+    // ADMIN FUNÇÕES
+    function postarAviso() {
+        const txt = document.getElementById('newsTxt').value;
+        if(txt) db.ref('news/').push({ texto: txt, data: new Date().toLocaleDateString() });
     }
-
     function aprovar(id) { db.ref('inscricoes/'+id).update({ status: "aprovado" }); }
-    function delMatch(id) { db.ref('partidas/'+id).remove(); }
-    function addWin(id, atual) { db.ref('inscricoes/'+id).update({ wins: (atual || 0) + 1 }); }
+    function addWin(id, v) { db.ref('inscricoes/'+id).update({ wins: v + 1 }); }
+    function darMedalha(id) { 
+        const m = prompt("Digite o emoji da medalha (🏆, ⭐, 👑):");
+        db.ref('inscricoes/'+id).update({ medals: m }); 
+    }
 
-    // REALTIME RENDER
-    db.ref().on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        const atletas = data.inscricoes || {};
-        const partidas = data.partidas || {};
+    // LISTENER PRINCIPAL
+    db.ref().on('value', snap => {
+        const d = snap.val() || {};
+        const atletas = d.inscricoes || {};
+        const news = d.news || {};
+
+        const feed = document.getElementById('feedNews');
+        const gridT = document.getElementById('gridTimes');
+        const corpoTab = document.getElementById('corpoTabela');
+        const admAtletas = document.getElementById('adminAtletas');
         
-        const gridTimes = document.getElementById('gridTimes');
-        const listaMatches = document.getElementById('listaMatches');
-        const listaAtletas = document.getElementById('listaAtletas');
-        const adminAtletas = document.getElementById('listaAdminAtletas');
-        const adminMatches = document.getElementById('adminListaMatches');
-
-        gridTimes.innerHTML = ""; listaMatches.innerHTML = ""; listaAtletas.innerHTML = "";
-        adminAtletas.innerHTML = ""; adminMatches.innerHTML = "";
+        feed.innerHTML = ""; gridT.innerHTML = ""; corpoTab.innerHTML = ""; admAtletas.innerHTML = "";
 
         const timesMap = {};
+        const ranking = [];
+
+        // Notícias
+        for(let id in news) {
+            feed.innerHTML = `<div class="card"><b>[${news[id].data}]</b><p>${news[id].texto}</p></div>` + feed.innerHTML;
+        }
 
         // Processar Atletas
         for(let id in atletas) {
             const p = atletas[id];
             if(p.status === "pendente") {
-                adminAtletas.innerHTML += `<div class="card">${p.nome} <button onclick="aprovar('${id}')">Aprovar</button></div>`;
+                admAtletas.innerHTML += `<div>${p.nome} <button onclick="aprovar('${id}')">Aprovar</button></div>`;
             } else {
-                // Popular Times
-                if(!timesMap[p.time]) timesMap[p.time] = { nome: p.time, escudo: p.escudoURL, count: 0 };
-                timesMap[p.time].count++;
+                // Mapa de Times
+                if(!timesMap[p.time]) timesMap[p.time] = { nome: p.time, logo: p.escudoURL, players: [] };
+                timesMap[p.time].players.push(p);
 
-                // Lista Ranking
-                listaAtletas.innerHTML += `
-                    <div class="player-row" data-name="${p.nome.toLowerCase()}">
-                        <img src="${p.fotoURL}">
-                        <div class="player-info">
-                            <b>${p.nome}</b> <small>[${p.wins} VITÓRIAS]</small>
-                            <p>${p.time}</p>
-                        </div>
-                        <a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="font-size:10px; color:var(--primary);">STATS</a>
+                ranking.push({ ...p, id });
+                
+                // Controle Adm
+                admAtletas.innerHTML += `
+                    <div style="font-size:11px; margin-top:10px; border-bottom:1px solid #333; padding-bottom:5px;">
+                        ${p.nome} (${p.wins}V) 
+                        <button onclick="addWin('${id}', ${p.wins})">+1 V</button>
+                        <button onclick="darMedalha('${id}')">🏅</button>
                     </div>`;
-
-                adminAtletas.innerHTML += `<div style="font-size:11px; margin-bottom:5px;">${p.nome} <button onclick="addWin('${id}', ${p.wins})">+1 Win</button></div>`;
             }
         }
 
-        // Renderizar Times
+        // Grid de Times
         for(let t in timesMap) {
-            gridTimes.innerHTML += `
-                <div class="team-box" data-team="${timesMap[t].nome.toLowerCase()}">
-                    <img src="${timesMap[t].escudo}">
-                    <div style="font-weight:bold; font-size:12px; color:var(--primary);">${timesMap[t].nome}</div>
-                    <div style="font-size:9px; color:#666;">${timesMap[t].count} JOGADORES</div>
+            gridT.innerHTML += `
+                <div class="team-box" onclick="verLineup('${t}')">
+                    <img src="${timesMap[t].logo}">
+                    <div style="font-weight:bold; margin-top:5px; color:var(--primary);">${t}</div>
                 </div>`;
         }
 
-        // Renderizar Partidas
-        for(let id in partidas) {
-            const m = partidas[id];
-            listaMatches.innerHTML += `
-                <div class="match-card">
-                    <div style="font-size:10px; color:var(--accent); margin-bottom:5px;">HOJE ÀS ${m.hora}</div>
-                    <div class="match-vs">
-                        <span>${m.t1}</span>
-                        <span style="color:#333; font-size:12px;">VS</span>
-                        <span>${m.t2}</span>
-                    </div>
-                </div>`;
-            adminMatches.innerHTML += `<div>${m.t1} vs ${m.t2} <button onclick="delMatch('${id}')">X</button></div>`;
-        }
+        // Ranking Tabela
+        ranking.sort((a,b) => b.wins - a.wins).forEach((a, i) => {
+            corpoTab.innerHTML += `
+                <tr style="border-bottom: 1px solid #30363d;">
+                    <td style="padding:15px 5px;">${i+1}º</td>
+                    <td><b>${a.nome}</b> <span style="font-size:10px; color:#8b949e;">${a.medals}</span></td>
+                    <td>${a.wins}</td>
+                    <td style="color:var(--primary);">${a.wins * 3} PTS</td>
+                </tr>`;
+        });
+
+        window.verLineup = (timeNome) => {
+            const lista = document.getElementById('listaLineup');
+            document.getElementById('tituloLineup').innerText = "LINE-UP: " + timeNome;
+            lista.innerHTML = "";
+            timesMap[timeNome].players.forEach(p => {
+                lista.innerHTML += `
+                    <div class="player-card">
+                        <div class="player-header">
+                            <img src="${p.fotoURL}" class="player-img">
+                            <div style="text-align:left;">
+                                <div style="font-size:18px; font-weight:bold;">${p.nome} <span class="medal-icon">${p.medals}</span></div>
+                                <div style="color:var(--primary); font-size:12px;">ORG: ${p.time}</div>
+                                <a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="color:#8b949e; text-decoration:none; font-size:10px;">➔ VER TRACKER</a>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            window.scrollTo(0, document.getElementById('tituloLineup').offsetTop - 100);
+        };
     });
-
-    // Filtros de Busca
-    function filtrarPlayers() {
-        let busca = document.getElementById('buscaPlayer').value.toLowerCase();
-        document.querySelectorAll('.player-row').forEach(el => {
-            el.style.display = el.dataset.name.includes(busca) ? "flex" : "none";
-        });
-    }
-
-    function filtrarTimes() {
-        let busca = document.getElementById('buscaTime').value.toLowerCase();
-        document.querySelectorAll('.team-box').forEach(el => {
-            el.style.display = el.dataset.team.includes(busca) ? "block" : "none";
-        });
-    }
 </script>
 </body>
 </html>
