@@ -7,39 +7,42 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #020408; --card: #0b0e14; --danger: #ff0055; --verified: #1d9bf0; --gold: #ffd700; }
-        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; }
+        :root { --primary: #00f0ff; --bg: #020408; --card: #0b0e14; --danger: #ff0055; --verified: #1d9bf0; --gold: #ffd700; --accent: #bc13fe; }
+        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
         
         /* Navbar Elite */
-        nav { background: rgba(0,0,0,0.95); padding: 12px; display: flex; justify-content: center; gap: 8px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--primary); overflow-x: auto; scrollbar-width: none; }
+        nav { background: rgba(0,0,0,0.95); padding: 12px; display: flex; justify-content: center; gap: 8px; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid var(--primary); overflow-x: auto; scrollbar-width: none; backdrop-filter: blur(10px); }
         nav button { background: none; border: 1px solid transparent; color: #666; cursor: pointer; font-weight: 700; font-size: 10px; text-transform: uppercase; padding: 8px 12px; border-radius: 4px; transition: 0.3s; }
-        nav button.active { color: var(--primary); border-color: var(--primary); background: rgba(0, 240, 255, 0.05); }
+        nav button.active { color: var(--primary); border-color: var(--primary); background: rgba(0, 240, 255, 0.05); text-shadow: 0 0 8px var(--primary); }
 
         .container { padding: 15px; max-width: 700px; margin: auto; }
         .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; filter: blur(5px); } to { opacity: 1; filter: blur(0); } }
+        @keyframes fadeIn { from { opacity: 0; filter: blur(5px); transform: translateY(10px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
 
-        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #1c2128; margin-bottom: 15px; }
-        h2 { color: var(--primary); text-transform: uppercase; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; margin-bottom: 20px; }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #1c2128; margin-bottom: 15px; position: relative; }
+        h2 { color: var(--primary); text-transform: uppercase; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; margin-bottom: 20px; letter-spacing: 1px; }
 
-        /* Widgets Profissionais */
+        /* Widgets de Status */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: #161b22; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #30363d; }
-        .stat-box small { font-size: 9px; color: #888; display: block; }
-        .stat-box b { color: var(--primary); font-size: 16px; }
+        .stat-box { background: #161b22; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #30363d; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .stat-box small { font-size: 9px; color: #888; display: block; text-transform: uppercase; }
+        .stat-box b { color: var(--primary); font-size: 18px; }
 
-        /* Lista de Transferências */
-        .transfer-item { font-size: 11px; padding: 8px; border-bottom: 1px solid #1c2128; display: flex; align-items: center; gap: 10px; }
-        .transfer-in { color: #00ff88; }
-
-        /* Player Card V2 */
-        .p-card { background: #0d1117; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #30363d; margin-bottom: 8px; position: relative; }
-        .p-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
-        .verified-badge { color: var(--verified); font-size: 12px; }
+        /* Player Card Estilizado */
+        .p-card { background: linear-gradient(145deg, #0d1117, #161b22); border-radius: 10px; padding: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #30363d; margin-bottom: 10px; transition: 0.3s; }
+        .p-card:hover { border-color: var(--primary); transform: scale(1.02); }
+        .p-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+        .verified-badge { color: var(--verified); font-size: 14px; margin-left: 5px; }
         
-        .btn-adm { background: #161b22; color: #fff; border: 1px solid #30363d; padding: 5px; border-radius: 4px; font-size: 9px; cursor: pointer; margin-right: 3px; }
-        .btn-ban { background: var(--danger); border: none; color: white; }
+        /* Botões Admin */
+        .adm-tools { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+        .btn-adm { background: #000; color: #fff; border: 1px solid #333; padding: 5px 8px; border-radius: 4px; font-size: 9px; cursor: pointer; transition: 0.2s; }
+        .btn-adm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-ban { background: var(--danger); border: none; }
+
+        /* Ranking Orgs */
+        .org-card { display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 8px; border-right: 3px solid var(--accent); }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -48,8 +51,8 @@
 <nav>
     <button onclick="showPage('home')" id="btn-home" class="active">Painel</button>
     <button onclick="showPage('times')" id="btn-times">Equipes</button>
-    <button onclick="showPage('mercado')" id="btn-mercado">Mercado</button>
-    <button onclick="showPage('tabela')" id="btn-tabela">Ranking</button>
+    <button onclick="showPage('mercado')" id="btn-mercado">Ranking</button>
+    <button onclick="showPage('cadastro')" id="btn-cadastro">Registro</button>
     <button onclick="showPage('admin')" id="btn-admin">Master</button>
 </nav>
 
@@ -57,19 +60,12 @@
     
     <div id="home" class="page active">
         <div class="stat-grid">
-            <div class="stat-box"><small>ATLETAS</small><b id="countAtletas">0</b></div>
-            <div class="stat-box"><small>TIMES</small><b id="countTimes">0</b></div>
-            <div class="stat-box"><small>PARTIDAS</small><b>EM BREVE</b></div>
+            <div class="stat-box"><small>Atletas</small><b id="countAtletas">0</b></div>
+            <div class="stat-box"><small>Times</small><b id="countTimes">0</b></div>
+            <div class="stat-box"><small>Temporada</small><b>V1.0</b></div>
         </div>
-        <h2>Comunicados Oficiais</h2>
+        <h2>Comunicados da Staff</h2>
         <div id="feedNews"></div>
-    </div>
-
-    <div id="mercado" class="page">
-        <h2>Transferências Recentes</h2>
-        <div class="card" id="listaMercado">
-            <p style="text-align:center; color:#555;">Nenhuma movimentação registrada.</p>
-        </div>
     </div>
 
     <div id="times" class="page">
@@ -77,24 +73,36 @@
         <div id="rankingOrgs"></div>
     </div>
 
-    <div id="tabela" class="page">
-        <h2>Top Global Atletas</h2>
+    <div id="mercado" class="page">
+        <h2>Classificação Global</h2>
         <div id="listaPlayers"></div>
     </div>
 
+    <div id="cadastro" class="page">
+        <h2>Criar Perfil Oficial</h2>
+        <div class="card">
+            <input id="pNome" placeholder="Nickname">
+            <input id="pTime" placeholder="Tag do Time">
+            <input id="pUbi" placeholder="ID do Tracker.gg">
+            <input id="pFotoURL" placeholder="Link da Foto">
+            <input id="pEscudoURL" placeholder="Link do Logo do Time">
+            <button class="btn-adm" style="width:100%; padding:15px; font-size:14px; border-color:var(--primary); color:var(--primary);" onclick="salvarPerfil()">SOLICITAR REGISTRO</button>
+        </div>
+    </div>
+
     <div id="admin" class="page">
-        <h2>Controle Master</h2>
+        <h2>Painel de Controle Master</h2>
         <div class="card">
             <input type="password" id="adminSenha" placeholder="Senha do Sistema">
             
             <div class="card">
-                <h3>Gerenciar Perfis</h3>
+                <h3>Gerenciar Atletas</h3>
                 <div id="adminListaMaster"></div>
             </div>
 
             <div class="card">
-                <h3>Novo Aviso</h3>
-                <textarea id="newsTxt" placeholder="Escreva aqui..."></textarea>
+                <h3>Postar Notícia</h3>
+                <textarea id="newsTxt" placeholder="Novidade..."></textarea>
                 <button class="btn-adm" style="width:100%; margin-top:10px;" onclick="postarNews()">POSTAR</button>
             </div>
         </div>
@@ -122,6 +130,18 @@
         document.getElementById('btn-'+id).classList.add('active');
     }
 
+    function salvarPerfil() {
+        const nome = document.getElementById('pNome').value;
+        if(!nome) return alert("Nick é obrigatório!");
+        db.ref('inscricoes/').push({
+            nome, ubiID: document.getElementById('pUbi').value,
+            time: (document.getElementById('pTime').value || "Sem Time").toUpperCase(),
+            fotoURL: document.getElementById('pFotoURL').value || "https://i.imgur.com/89SByG1.png",
+            escudoURL: document.getElementById('pEscudoURL').value || "https://i.imgur.com/6E6v4pL.png",
+            status: "pendente", wins: 0, verificado: false
+        }).then(() => alert("Enviado para aprovação!"));
+    }
+
     // FUNÇÕES MASTER
     function postarNews() {
         const txt = document.getElementById('newsTxt').value;
@@ -132,7 +152,7 @@
     function banir(id) { if(confirm("Banir permanentemente?")) db.ref('inscricoes/'+id).update({ status: "banido" }); }
     function aprovar(id) { db.ref('inscricoes/'+id).update({ status: "aprovado" }); }
 
-    // RENDERIZAÇÃO
+    // REALTIME RENDER
     db.ref().on('value', snap => {
         const d = snap.val() || {};
         const atletas = d.inscricoes || {};
@@ -159,60 +179,59 @@
                 countAtletas++;
                 rankingAtletas.push({...p, id});
 
-                // Lógica de Orgs
                 if(!orgs[p.time]) orgs[p.time] = { wins: 0, players: 0, logo: p.escudoURL };
                 orgs[p.time].wins += (p.wins || 0);
                 orgs[p.time].players += 1;
 
-                // Painel Admin
                 adminMaster.innerHTML += `
-                    <div style="font-size:11px; padding:5px; border-bottom:1px solid #333;">
-                        ${p.nome} | 
-                        <button class="btn-adm" onclick="setWin('${id}', ${p.wins})">WIN</button>
-                        <button class="btn-adm" onclick="setVerificado('${id}', ${!p.verificado})">✔</button>
-                        <button class="btn-adm btn-ban" onclick="banir('${id}')">BAN</button>
+                    <div style="font-size:11px; padding:10px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                        <span>${p.nome} (${p.wins}W)</span>
+                        <div class="adm-tools">
+                            <button class="btn-adm" onclick="setWin('${id}', ${p.wins})">+WIN</button>
+                            <button class="btn-adm" onclick="setVerificado('${id}', ${!p.verificado})">VERIF</button>
+                            <button class="btn-adm btn-ban" onclick="banir('${id}')">BAN</button>
+                        </div>
                     </div>`;
             }
         }
 
-        // Renderizar Ranking Orgs
-        const sortOrgs = Object.keys(orgs).sort((a,b) => orgs[b].wins - orgs[a].wins);
-        sortOrgs.forEach((nome, i) => {
+        // Orgs Ranking
+        Object.keys(orgs).sort((a,b) => orgs[b].wins - orgs[a].wins).forEach((nome, i) => {
             rankingOrgs.innerHTML += `
-                <div class="card" style="display:flex; align-items:center; gap:15px; border-left: 4px solid var(--primary);">
-                    <b style="color:var(--primary)">#${i+1}</b>
-                    <img src="${orgs[nome].logo}" style="width:40px;">
-                    <div style="flex-grow:1"><b>${nome}</b><br><small>${orgs[nome].players} Atletas</small></div>
+                <div class="org-card">
+                    <b style="color:var(--primary); font-size:18px;">#${i+1}</b>
+                    <img src="${orgs[nome].logo}" style="width:40px; height:40px; object-fit:contain;">
+                    <div style="flex-grow:1"><b>${nome}</b><br><small style="color:#666;">${orgs[nome].players} Atletas</small></div>
                     <div style="text-align:right"><b>${orgs[nome].wins * 3}</b><br><small>PTS</small></div>
                 </div>`;
         });
 
-        // Renderizar Ranking Atletas
+        // Players Ranking
         rankingAtletas.sort((a,b) => b.wins - a.wins).forEach((p, i) => {
             listaPlayers.innerHTML += `
                 <div class="p-card">
                     <img src="${p.fotoURL}" class="p-img">
                     <div style="flex-grow:1">
-                        <b>${p.nome}</b> ${p.verificado ? '<span class="verified-badge">●</span>' : ''}
+                        <b>${p.nome}</b> ${p.verificado ? '<span class="verified-badge">✔</span>' : ''}
                         <br><small style="color:#888">${p.time}</small>
                     </div>
                     <div style="text-align:right">
                         <b style="color:var(--primary)">${p.wins * 3} PTS</b>
-                        <br><a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="font-size:8px; color:#555;">TRACKER</a>
+                        <br><a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="font-size:8px; color:#555;">VER STATS</a>
                     </div>
                 </div>`;
         });
 
         // Notícias
         for(let id in news) {
-            feedNews.innerHTML = `<div class="card" style="border-top:2px solid var(--primary)">
-                <small style="color:var(--primary)">OFFICIAL - ${news[id].data}</small>
-                <p style="margin-top:10px; font-size:14px;">${news[id].texto}</p>
+            feedNews.innerHTML = `<div class="card" style="border-left: 4px solid var(--primary);">
+                <small style="color:var(--primary)">${news[id].data}</small>
+                <p style="margin-top:10px; font-size:14px; line-height:1.4;">${news[id].texto}</p>
             </div>` + feedNews.innerHTML;
         }
 
         document.getElementById('countAtletas').innerText = countAtletas;
-        document.getElementById('countTimes').innerText = sortOrgs.length;
+        document.getElementById('countTimes').innerText = Object.keys(orgs).length;
     });
 </script>
 </body>
