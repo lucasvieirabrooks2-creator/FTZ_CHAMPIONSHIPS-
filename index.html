@@ -1,232 +1,178 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Ultra Platform | Tudo-em-Um</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <style>
-        :root { --primary: #00f0ff; --bg: #05070a; --card: #0d1117; --accent: #7000ff; --win: #00ff88; --ia-gradient: linear-gradient(135deg, #7000ff, #00f0ff); }
-        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
-        
-        /* Navbar Superior Completa */
-        nav { background: #000; padding: 12px; display: flex; justify-content: center; gap: 10px; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 1000; overflow-x: auto; }
-        nav button { background: none; border: none; color: #555; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 10px; white-space: nowrap; transition: 0.3s; }
-        nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTz PRO System</title>
 
-        .container { padding: 20px; max-width: 600px; margin: auto; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
-        /* Cards Estilizados conforme as Fotos */
-        .card { background: var(--card); border: 1px solid #30363d; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
-        .btn-main { background: var(--primary); color: #000; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-ia { background: var(--ia-gradient); color: #fff; }
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background:#0b0f14;
+    color:white;
+}
 
-        /* Estilo do Ranking (Foto 1) */
-        .ranking-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; align-items: center; }
-        .pos { color: var(--primary); font-weight: bold; width: 30px; }
+.container {
+    padding:15px;
+}
 
-        /* Perfil Header */
-        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary); }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+.card {
+    background:#111827;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+input {
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+    background:#000;
+    border:1px solid #333;
+    color:white;
+}
+
+button {
+    width:100%;
+    padding:12px;
+    background:#00eaff;
+    border:none;
+    font-weight:bold;
+}
+
+.ranking {
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    border-bottom:1px solid #222;
+}
+</style>
 </head>
-<body>
 
-<nav>
-    <button onclick="showPage('news')" id="btn-news" class="active">News Feed</button>
-    <button onclick="showPage('ranking')" id="btn-ranking">Ranking</button>
-    <button onclick="showPage('perfil')" id="btn-perfil">Perfil Atleta</button>
-    <button onclick="showPage('inscricao')" id="btn-inscricao">Inscrição</button>
-    <button onclick="showPage('ia-panel')" id="btn-ia-panel">Painel IA</button>
-    <button onclick="showPage('sistema')" id="btn-sistema">Sistema Master</button>
-</nav>
+<body>
 
 <div class="container">
 
-    <div id="news" class="page active">
-        <h2>Gerador de Notícias Recentes</h2>
-        <div id="feedContent"></div>
+<div id="auth">
+    <div class="card">
+        <h3>Login / Cadastro</h3>
+        <input id="email" placeholder="Email">
+        <input id="senha" type="password" placeholder="Senha">
+        <button onclick="login()">Entrar / Criar</button>
+    </div>
+</div>
+
+<div id="app" style="display:none;">
+
+    <div class="card">
+        <h3>Meu Perfil</h3>
+        <p id="userEmail"></p>
+        <p>Vitórias: <span id="wins">0</span></p>
+        <button onclick="logout()">Sair</button>
     </div>
 
-    <div id="ranking" class="page">
-        <h2>Ranking Global de Atletas</h2>
-        <div class="card" id="rankingList">
-            </div>
+    <div class="card">
+        <h3>Adicionar Vitória</h3>
+        <button onclick="addWin()">+1 Win</button>
     </div>
 
-    <div id="perfil" class="page">
-        <div id="loginSection">
-            <h2>Acesso Restrito</h2>
-            <div class="card">
-                <input id="lNick" placeholder="Usuário">
-                <input id="lPass" type="password" placeholder="Senha">
-                <button class="btn-main" onclick="entrar()">Entrar</button>
-                <p style="text-align:center; font-size:12px; margin-top:15px; color:#666;">Novo? Crie sua conta abaixo.</p>
-                <input id="rNick" placeholder="Nick Único">
-                <input id="rPass" type="password" placeholder="Nova Senha">
-                <input id="rUbi" placeholder="ID Ubisoft Connect">
-                <button class="btn-main" style="background:#222; color:#fff;" onclick="registrar()">Criar Conta</button>
-            </div>
-        </div>
-        <div id="perfilArea" style="display:none;">
-            <h2>Meu Passaporte</h2>
-            <div class="card">
-                <div class="profile-header">
-                    <div class="avatar"></div>
-                    <div><h3 id="pNick">Atleta</h3><small id="pUbi" style="color:var(--primary)"></small></div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <div style="background:#161b22; flex:1; padding:10px; border-radius:8px; text-align:center;">
-                        <small>VITÓRIAS</small><br><b id="pWins">0</b>
-                    </div>
-                </div>
-                <button class="btn-main" style="margin-top:20px; background:var(--accent); color:#fff;" onclick="location.reload()">Sair</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="inscricao" class="page">
-        <h2>Inscrição no Campeonato</h2>
-        <div class="card">
-            <select id="insTorneio"></select>
-            <input id="insTime" placeholder="Nome da Equipe">
-            <textarea id="insLineup" placeholder="Line-up: Nick1, Nick2, Nick3, Nick4, Nick5"></textarea>
-            <button class="btn-main" onclick="inscrever()">Enviar para ADM</button>
-        </div>
-    </div>
-
-    <div id="ia-panel" class="page">
-        <h2>Gerador de Notícias IA</h2>
-        <div class="card" style="border: 2px solid var(--accent);">
-            <p style="color:var(--accent); font-size:12px;">Dê um tópico e a IA escreverá a notícia completa.</p>
-            <select id="iaTipo">
-                <option>Resultado de Jogo</option>
-                <option>Transferência de Jogador</option>
-                <option>Anúncio de Torneio</option>
-            </select>
-            <textarea id="iaPrompt" placeholder="Ex: FTz venceu a final contra a Team Zeus por 7-2 no mapa Oregon."></textarea>
-            <button class="btn-main btn-ia" onclick="gerarIA()">GERAR E POSTAR COM IA</button>
-        </div>
-        <h3>Segurança</h3>
-        <input type="password" id="passMaster" placeholder="Senha Master">
-    </div>
-
-    <div id="sistema" class="page">
-        <h2>Painel de Gestão Master</h2>
-        <div class="card">
-            <h3>Criar Evento</h3>
-            <input id="sysNome" placeholder="Nome do Torneio">
-            <select id="sysModo">
-                <option>Modo: Mata-mata</option>
-                <option>Modo: Liga</option>
-            </select>
-            <input id="sysPremio" placeholder="Premiação">
-            <button class="btn-main" onclick="criarEvento()">PUBLICAR NO SISTEMA</button>
-        </div>
-        <div class="card">
-            <h3>Gerenciar Inscrições</h3>
-            <div id="pendentesArea"></div>
-        </div>
+    <div class="card">
+        <h3>Ranking</h3>
+        <div id="ranking"></div>
     </div>
 
 </div>
 
+</div>
+
 <script>
-    // Configurações do seu Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
-        authDomain: "ftzchampionships.firebaseapp.com",
-        databaseURL: "https://ftzchampionships-default-rtdb.firebaseio.com",
-        projectId: "ftzchampionships",
-        storageBucket: "ftzchampionships.appspot.com",
-        messagingSenderId: "241465233774",
-        appId: "1:241465233774:web:877740ce39f06443acf17f"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    let loggedUser = null;
 
-    function showPage(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('btn-'+id).classList.add('active');
-    }
+// COLE SEU FIREBASE AQUI
+const firebaseConfig = {
+  apiKey: "SUA_KEY",
+  authDomain: "SEU_AUTH",
+  databaseURL: "SEU_DB",
+  projectId: "SEU_ID"
+};
 
-    // SISTEMAS DE DADOS
-    function registrar() {
-        const n = document.getElementById('rNick').value;
-        const p = document.getElementById('rPass').value;
-        if(!n || !p) return alert("Erro nos campos!");
-        db.ref('users/'+n).set({ nick: n, pass: p, ubi: document.getElementById('rUbi').value, wins: 0 });
-        alert("Conta Criada!");
-    }
+firebase.initializeApp(firebaseConfig);
 
-    function entrar() {
-        const n = document.getElementById('lNick').value;
-        const p = document.getElementById('lPass').value;
-        db.ref('users/'+n).once('value', s => {
-            const u = s.val();
-            if(u && u.pass === p) {
-                loggedUser = u;
-                document.getElementById('loginSection').style.display='none';
-                document.getElementById('perfilArea').style.display='block';
-                document.getElementById('pNick').innerText = u.nick;
-                document.getElementById('pUbi').innerText = "Ubisoft: "+u.ubi;
-                document.getElementById('pWins').innerText = u.wins;
-            } else alert("Erro no Login!");
-        });
-    }
+const auth = firebase.auth();
+const db = firebase.database();
 
-    function criarEvento() {
-        db.ref('eventos/').push({ nome: document.getElementById('sysNome').value, premio: document.getElementById('sysPremio').value });
-        alert("Evento Publicado!");
-    }
+// LOGIN / CADASTRO
+function login(){
+    const email = emailInput.value;
+    const senha = senhaInput.value;
 
-    function gerarIA() {
-        const prompt = document.getElementById('iaPrompt').value;
-        db.ref('noticias/').push({ texto: "[IA] "+prompt, data: new Date().toLocaleDateString() });
-        alert("Notícia gerada com IA!");
-    }
-
-    function inscrever() {
-        if(!loggedUser) return alert("Logue primeiro!");
-        db.ref('inscricoes/').push({ time: document.getElementById('insTime').value, capitao: loggedUser.nick });
-        alert("Inscrição Enviada!");
-    }
-
-    // SYNC REALTIME
-    db.ref().on('value', snap => {
-        const d = snap.val() || {};
-        
-        // Feed News
-        const feed = document.getElementById('feedContent');
-        feed.innerHTML = "";
-        const news = d.noticias || {};
-        Object.keys(news).reverse().forEach(k => {
-            feed.innerHTML += `<div class="card"><small>${news[k].data}</small><p>${news[k].texto}</p></div>`;
-        });
-
-        // Ranking
-        const rankList = document.getElementById('rankingList');
-        rankList.innerHTML = "";
-        const users = d.users || {};
-        Object.values(users).sort((a,b) => b.wins - a.wins).forEach((u, i) => {
-            rankList.innerHTML += `<div class="ranking-row"><span class="pos">#${i+1}</span><span>${u.nick}</span><b>${u.wins}V</b></div>`;
-        });
-
-        // Campeonatos no Select
-        const sel = document.getElementById('insTorneio');
-        sel.innerHTML = "<option>Escolha o Torneio</option>";
-        const evs = d.eventos || {};
-        for(let k in evs) sel.innerHTML += `<option>${evs[k].nome}</option>`;
+    auth.signInWithEmailAndPassword(email, senha)
+    .catch(()=>{
+        auth.createUserWithEmailAndPassword(email, senha);
     });
+}
+
+function logout(){
+    auth.signOut();
+}
+
+// USUÁRIO LOGADO
+auth.onAuthStateChanged(user=>{
+    if(user){
+        authDiv.style.display="none";
+        app.style.display="block";
+
+        userEmail.innerText = user.email;
+
+        const ref = db.ref("users/"+user.uid);
+
+        ref.once("value", snap=>{
+            if(!snap.exists()){
+                ref.set({wins:0});
+            }
+        });
+
+        ref.on("value", snap=>{
+            wins.innerText = snap.val().wins || 0;
+        });
+
+    } else {
+        authDiv.style.display="block";
+        app.style.display="none";
+    }
+});
+
+// ADD WIN
+function addWin(){
+    const user = auth.currentUser;
+    const ref = db.ref("users/"+user.uid+"/wins");
+
+    ref.transaction(v => (v || 0) + 1);
+}
+
+// RANKING REALTIME
+db.ref("users").on("value", snap=>{
+    const data = snap.val() || {};
+    const list = Object.entries(data)
+        .map(([id,u]) => ({id,...u}))
+        .sort((a,b)=>b.wins-a.wins);
+
+    ranking.innerHTML = "";
+
+    list.forEach((u,i)=>{
+        ranking.innerHTML += `
+        <div class="ranking">
+            <span>#${i+1}</span>
+            <span>${u.wins} wins</span>
+        </div>`;
+    });
+});
+
 </script>
+
 </body>
 </html>
