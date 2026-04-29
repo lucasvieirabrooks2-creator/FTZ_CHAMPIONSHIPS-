@@ -3,40 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championship - Gestão de Atletas</title>
+    <title>FTz Championship - Player Hub</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
         
         nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 15px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); }
-        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; }
         nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
         .container { padding: 20px; max-width: 800px; margin: auto; }
-        .page { display: none; animation: fadeIn 0.5s; }
+        .page { display: none; animation: slideUp 0.4s ease-out; }
         .page.active { display: block; }
         
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .card { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid #1e293b; margin-bottom: 20px; }
-        h1 { color: var(--primary); text-align: center; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; position: relative; }
+        h1 { color: var(--primary); text-align: center; font-size: 1.5rem; }
+        
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
+        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
         
-        .btn { background: var(--primary); color: #000; padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
-        .btn-approve { background: var(--success); color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; }
-        .btn-reject { background: var(--danger); color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; }
-        
-        .atleta-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; gap: 10px; }
-        .admin-actions { display: flex; gap: 8px; }
-        .stats-btn { background: #1e293b; color: var(--primary); border: 1px solid var(--primary); padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; }
+        .atleta-list-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; cursor: pointer; transition: 0.3s; }
+        .atleta-list-item:hover { background: #1e293b; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); margin-right: 15px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
+
+        /* Estilo do Perfil */
+        .perfil-header { text-align: center; padding: 20px; background: linear-gradient(180deg, #1e293b 0%, var(--bg) 100%); border-radius: 15px; margin-bottom: 20px; }
+        .perfil-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--primary); color: var(--primary); font-size: 12px; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .stat-box { background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #1e293b; }
     </style>
 </head>
 <body>
 
 <nav>
-    <button onclick="showPage('home')" id="btn-home" class="active">Início</button>
+    <button onclick="showPage('home')" id="btn-home" class="active">Home</button>
     <button onclick="showPage('inscricao')" id="btn-inscricao">Inscrição</button>
     <button onclick="showPage('atletas')" id="btn-atletas">Atletas</button>
     <button onclick="showPage('admin')" id="btn-admin">Admin</button>
@@ -45,33 +49,36 @@
 <div class="container">
     <div id="home" class="page active">
         <h1>FTz CHAMPIONSHIPS</h1>
-        <div class="card">
-            <p style="text-align: center; line-height: 1.6;">Painel de controle de atletas e estatísticas integradas.</p>
-            <button class="btn" onclick="showPage('inscricao')">NOVA INSCRIÇÃO</button>
+        <div class="card" style="text-align: center;">
+            <p>Gerencie sua carreira e acompanhe o ranking da FTz Gaming.</p>
+            <button class="btn" onclick="showPage('inscricao')">CRIAR MEU PERFIL</button>
         </div>
     </div>
 
     <div id="inscricao" class="page">
-        <h1>INSCRIÇÃO</h1>
+        <h1>NOVA CONTA</h1>
         <div class="card">
-            <input id="atletaNome" placeholder="Nome do Atleta (Ex: Shisui.FTz)">
-            <input id="ubiID" placeholder="ID Ubisoft (Ex: TioWellison.FTZ)">
-            <button class="btn" onclick="inscrever()">SOLICITAR ACESSO</button>
+            <input id="atletaNome" placeholder="Seu Nickname (Ex: Shisui.FTz)">
+            <input id="ubiID" placeholder="Seu ID Ubisoft (Ex: TioWellison.FTZ)">
+            <button class="btn" onclick="inscrever()">SOLICITAR APROVAÇÃO</button>
         </div>
     </div>
 
     <div id="atletas" class="page">
-        <h1>ATLETAS APROVADOS</h1>
-        <div id="listaAtletas" class="card">Nenhum atleta aprovado no momento.</div>
+        <h1>HALL DA FAMA</h1>
+        <div id="listaAtletas" class="card" style="padding: 0;"></div>
+    </div>
+
+    <div id="perfil" class="page">
+        <button onclick="showPage('atletas')" style="background:none; border:none; color:var(--primary); cursor:pointer;">← Voltar</button>
+        <div id="conteudoPerfil"></div>
     </div>
 
     <div id="admin" class="page">
-        <h1>PAINEL DE CONTROLE</h1>
+        <h1>PAINEL ADM</h1>
         <div class="card">
-            <label>Senha Administrativa:</label>
-            <input type="password" id="adminSenha" placeholder="Senha para ações">
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-            <div id="pendentes">Carregando solicitações...</div>
+            <input type="password" id="adminSenha" placeholder="Senha Admin">
+            <div id="pendentes"></div>
         </div>
     </div>
 </div>
@@ -95,74 +102,81 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        document.getElementById('btn-' + pageId).classList.add('active');
+        const navBtn = document.getElementById('btn-' + pageId);
+        if(navBtn) navBtn.classList.add('active');
     }
 
     function inscrever() {
         const nome = document.getElementById('atletaNome').value;
         const ubi = document.getElementById('ubiID').value;
-        if(!nome || !ubi) return alert("Campos obrigatórios!");
+        if(!nome || !ubi) return alert("Preencha tudo!");
 
         db.ref('inscricoes/').push({
             nome: nome,
             ubiID: ubi,
-            status: "pendente"
+            status: "pendente",
+            vitorias: 0,
+            derrotas: 0
         }).then(() => {
-            alert("Pedido enviado com sucesso!");
-            document.getElementById('atletaNome').value = "";
-            document.getElementById('ubiID').value = "";
+            alert("Pedido enviado!");
             showPage('home');
+        });
+    }
+
+    // Gerenciar Perfis
+    function abrirPerfil(id) {
+        db.ref('inscricoes/' + id).once('value', (snapshot) => {
+            const p = snapshot.val();
+            const container = document.getElementById('conteudoPerfil');
+            container.innerHTML = `
+                <div class="perfil-header">
+                    <div class="perfil-badge">ATLETA OFICIAL</div>
+                    <h2 style="margin:5px 0;">${p.nome}</h2>
+                    <p style="color:#aaa">ID Ubisoft: ${p.ubiID}</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box"><small>WINS</small><br><b style="color:var(--success)">${p.vitorias || 0}</b></div>
+                    <div class="stat-box"><small>LOSS</small><br><b style="color:var(--danger)">${p.derrotas || 0}</b></div>
+                </div>
+                <a href="https://r6.tracker.network/profile/pc/${p.ubiID}" target="_blank" class="btn" style="display:block; text-align:center; text-decoration:none;">ABRIR R6 TRACKER</a>
+            `;
+            showPage('perfil');
         });
     }
 
     db.ref('inscricoes/').on('value', (snapshot) => {
         const data = snapshot.val();
         const lista = document.getElementById('listaAtletas');
-        const pendentesDiv = document.getElementById('pendentes');
-        
+        const pendentes = document.getElementById('pendentes');
         lista.innerHTML = "";
-        pendentesDiv.innerHTML = "<h3>Solicitações Pendentes:</h3>";
-
-        let temAprovado = false;
-        let temPendente = false;
+        pendentes.innerHTML = "<h3>Pedidos:</h3>";
 
         for (let id in data) {
             const p = data[id];
             if(p.status === "aprovado") {
-                temAprovado = true;
                 lista.innerHTML += `
-                <div class="atleta-item">
-                    <div><strong>${p.nome}</strong><br><small>ID: ${p.ubiID}</small></div>
-                    <a href="https://r6.tracker.network/profile/pc/${p.ubiID}" target="_blank" class="stats-btn">STATS</a>
-                </div>`;
-            } else if(p.status === "pendente") {
-                temPendente = true;
-                pendentesDiv.innerHTML += `
-                <div class="atleta-item">
-                    <span>${p.nome}</span>
-                    <div class="admin-actions">
-                        <button class="btn-approve" onclick="decisao('${id}', 'aprovado')">Aceitar</button>
-                        <button class="btn-reject" onclick="decisao('${id}', 'recusado')">Recusar</button>
-                    </div>
-                </div>`;
+                    <div class="atleta-list-item" onclick="abrirPerfil('${id}')">
+                        <div class="avatar">${p.nome.charAt(0)}</div>
+                        <div style="flex:1"><strong>${p.nome}</strong><br><small style="color:var(--primary)">Ver Perfil Profissional</small></div>
+                        <span>→</span>
+                    </div>`;
+            } else {
+                pendentes.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span>${p.nome}</span>
+                        <div>
+                            <button onclick="decidir('${id}', 'aprovado')" style="color:var(--success)">✓</button>
+                            <button onclick="decidir('${id}', 'recusado')" style="color:var(--danger)">X</button>
+                        </div>
+                    </div>`;
             }
         }
-        if(!temAprovado) lista.innerHTML = "Nenhum atleta aprovado.";
-        if(!temPendente) pendentesDiv.innerHTML = "Não há pedidos pendentes.";
     });
 
-    function decisao(id, acao) {
-        const senha = document.getElementById('adminSenha').value;
-        if(senha !== "FTZ123") return alert("Senha incorreta!");
-
-        if(acao === "aprovado") {
-            db.ref('inscricoes/' + id).update({ status: "aprovado" });
-        } else {
-            // Se recusar, removemos do banco de dados
-            if(confirm("Deseja realmente recusar e excluir esta inscrição?")) {
-                db.ref('inscricoes/' + id).remove();
-            }
-        }
+    function decidir(id, acao) {
+        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha!");
+        if(acao === 'aprovado') db.ref('inscricoes/' + id).update({ status: 'aprovado' });
+        else db.ref('inscricoes/' + id).remove();
     }
 </script>
 </body>
