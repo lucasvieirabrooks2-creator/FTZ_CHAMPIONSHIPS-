@@ -3,117 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championship | Pro Platform</title>
+    <title>FTz Pro League | Ultimate Hub</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #03050a; --card: #0d1117; --danger: #ff4d4d; --accent: #bc13fe; --gold: #ffd700; }
-        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #e6edf3; overflow-x: hidden; }
+        :root { --primary: #00f0ff; --bg: #020408; --card: #0b0e14; --danger: #ff0055; --verified: #1d9bf0; --gold: #ffd700; }
+        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; }
         
-        /* Navbar Futurista */
-        nav { background: rgba(0,0,0,0.9); padding: 15px; display: flex; justify-content: center; gap: 15px; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid var(--primary); backdrop-filter: blur(10px); overflow-x: auto; }
-        nav button { background: none; border: none; color: #8b949e; cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase; transition: 0.4s; padding: 5px 10px; border-radius: 5px; }
-        nav button.active { color: var(--primary); background: rgba(0, 240, 255, 0.1); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.2); }
+        /* Navbar Elite */
+        nav { background: rgba(0,0,0,0.95); padding: 12px; display: flex; justify-content: center; gap: 8px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--primary); overflow-x: auto; scrollbar-width: none; }
+        nav button { background: none; border: 1px solid transparent; color: #666; cursor: pointer; font-weight: 700; font-size: 10px; text-transform: uppercase; padding: 8px 12px; border-radius: 4px; transition: 0.3s; }
+        nav button.active { color: var(--primary); border-color: var(--primary); background: rgba(0, 240, 255, 0.05); }
 
-        .container { padding: 20px; max-width: 800px; margin: auto; }
-        .page { display: none; animation: slideIn 0.5s ease-out; }
+        .container { padding: 15px; max-width: 700px; margin: auto; }
+        .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; filter: blur(5px); } to { opacity: 1; filter: blur(0); } }
 
-        /* Estilo dos Cards */
-        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        h1, h2, h3 { color: var(--primary); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #1c2128; margin-bottom: 15px; }
+        h2 { color: var(--primary); text-transform: uppercase; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; margin-bottom: 20px; }
 
-        /* Inputs Gamer */
-        input, select, textarea { width: 100%; padding: 14px; margin: 10px 0; border-radius: 8px; border: 1px solid #30363d; background: #161b22; color: #fff; font-family: inherit; }
-        .btn { background: var(--primary); color: #000; padding: 15px; border: none; border-radius: 8px; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { filter: brightness(1.2); box-shadow: 0 0 20px var(--primary); }
+        /* Widgets Profissionais */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: #161b22; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #30363d; }
+        .stat-box small { font-size: 9px; color: #888; display: block; }
+        .stat-box b { color: var(--primary); font-size: 16px; }
 
-        /* Player Cards - Estilo Pro */
-        .player-card { background: linear-gradient(145deg, #0d1117, #161b22); border-radius: 20px; padding: 20px; position: relative; border: 1px solid #30363d; margin-bottom: 15px; transition: 0.3s; }
-        .player-header { display: flex; align-items: center; gap: 15px; }
-        .player-img { width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
-        .medals { display: flex; gap: 5px; margin-top: 5px; }
-        .medal-icon { font-size: 18px; filter: drop-shadow(0 0 5px var(--gold)); }
+        /* Lista de Transferências */
+        .transfer-item { font-size: 11px; padding: 8px; border-bottom: 1px solid #1c2128; display: flex; align-items: center; gap: 10px; }
+        .transfer-in { color: #00ff88; }
 
-        /* Grid de Times */
-        .teams-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .team-box { background: #161b22; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
-        .team-box:hover { border-color: var(--primary); transform: scale(1.05); }
-        .team-box img { width: 60px; height: 60px; object-fit: contain; }
-
-        /* Widget de Stream */
-        .stream-box { background: #000; border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        /* Player Card V2 */
+        .p-card { background: #0d1117; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #30363d; margin-bottom: 8px; position: relative; }
+        .p-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .verified-badge { color: var(--verified); font-size: 12px; }
+        
+        .btn-adm { background: #161b22; color: #fff; border: 1px solid #30363d; padding: 5px; border-radius: 4px; font-size: 9px; cursor: pointer; margin-right: 3px; }
+        .btn-ban { background: var(--danger); border: none; color: white; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <nav>
-    <button onclick="showPage('home')" id="btn-home" class="active">News</button>
-    <button onclick="showPage('times')" id="btn-times">Times</button>
+    <button onclick="showPage('home')" id="btn-home" class="active">Painel</button>
+    <button onclick="showPage('times')" id="btn-times">Equipes</button>
+    <button onclick="showPage('mercado')" id="btn-mercado">Mercado</button>
     <button onclick="showPage('tabela')" id="btn-tabela">Ranking</button>
-    <button onclick="showPage('cadastro')" id="btn-cadastro">Registro</button>
     <button onclick="showPage('admin')" id="btn-admin">Master</button>
 </nav>
 
 <div class="container">
     
     <div id="home" class="page active">
-        <div class="stream-box">● AO VIVO: FTz Championship Series</div>
-        <h1>Últimas Notícias</h1>
+        <div class="stat-grid">
+            <div class="stat-box"><small>ATLETAS</small><b id="countAtletas">0</b></div>
+            <div class="stat-box"><small>TIMES</small><b id="countTimes">0</b></div>
+            <div class="stat-box"><small>PARTIDAS</small><b>EM BREVE</b></div>
+        </div>
+        <h2>Comunicados Oficiais</h2>
         <div id="feedNews"></div>
     </div>
 
+    <div id="mercado" class="page">
+        <h2>Transferências Recentes</h2>
+        <div class="card" id="listaMercado">
+            <p style="text-align:center; color:#555;">Nenhuma movimentação registrada.</p>
+        </div>
+    </div>
+
     <div id="times" class="page">
-        <h2>Organizações Registradas</h2>
-        <div id="gridTimes" class="teams-container"></div>
-        <hr style="border: 0.5px solid #30363d; margin: 30px 0;">
-        <h3 id="tituloLineup">Selecione um time para ver a Line-up</h3>
-        <div id="listaLineup"></div>
+        <h2>Ranking de Organizações</h2>
+        <div id="rankingOrgs"></div>
     </div>
 
     <div id="tabela" class="page">
-        <h2>Classificação Geral</h2>
-        <div class="card">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="color: var(--primary); font-size: 12px; text-align: left;">
-                        <th>POS</th><th>PLAYER</th><th>VITÓRIAS</th><th>PONTOS</th>
-                    </tr>
-                </thead>
-                <tbody id="corpoTabela"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="cadastro" class="page">
-        <h2>Criar Perfil de Atleta</h2>
-        <div class="card">
-            <input id="pNome" placeholder="Nickname Oficial">
-            <input id="pTime" placeholder="Tag do Time (Ex: FTz)">
-            <input id="pUbi" placeholder="ID do Tracker.gg">
-            <input id="pFotoURL" placeholder="Link da Foto de Perfil">
-            <input id="pEscudoURL" placeholder="Link do Logo do Time">
-            <button class="btn" onclick="solicitarPerfil()">ENVIAR PARA O ADM</button>
-        </div>
+        <h2>Top Global Atletas</h2>
+        <div id="listaPlayers"></div>
     </div>
 
     <div id="admin" class="page">
-        <h1>Painel de Controle</h1>
+        <h2>Controle Master</h2>
         <div class="card">
-            <input type="password" id="adminSenha" placeholder="Senha Mestra">
+            <input type="password" id="adminSenha" placeholder="Senha do Sistema">
             
-            <div class="card" style="border-color: var(--primary);">
-                <h3>Gerenciar Atletas</h3>
-                <div id="adminAtletas"></div>
+            <div class="card">
+                <h3>Gerenciar Perfis</h3>
+                <div id="adminListaMaster"></div>
             </div>
 
-            <div class="card" style="border-color: var(--accent);">
-                <h3>Postar Comunicado</h3>
-                <textarea id="newsTxt" placeholder="Novidade importante..."></textarea>
-                <button class="btn" style="background: var(--accent); color:#fff;" onclick="postarAviso()">PUBLICAR</button>
+            <div class="card">
+                <h3>Novo Aviso</h3>
+                <textarea id="newsTxt" placeholder="Escreva aqui..."></textarea>
+                <button class="btn-adm" style="width:100%; margin-top:10px;" onclick="postarNews()">POSTAR</button>
             </div>
         </div>
     </div>
@@ -121,7 +103,6 @@
 </div>
 
 <script>
-    // CONFIGURAÇÃO DO SEU FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
         authDomain: "ftzchampionships.firebaseapp.com",
@@ -134,9 +115,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const IMG_USER = "https://i.imgur.com/89SByG1.png";
-    const IMG_TEAM = "https://i.imgur.com/6E6v4pL.png";
-
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -144,112 +122,97 @@
         document.getElementById('btn-'+id).classList.add('active');
     }
 
-    function solicitarPerfil() {
-        const nome = document.getElementById('pNome').value;
-        if(!nome) return alert("Nickname é obrigatório!");
-        db.ref('inscricoes/').push({
-            nome, ubiID: document.getElementById('pUbi').value,
-            time: (document.getElementById('pTime').value || "FREE AGENT").toUpperCase(),
-            fotoURL: document.getElementById('pFotoURL').value || IMG_USER,
-            escudoURL: document.getElementById('pEscudoURL').value || IMG_TEAM,
-            status: "pendente", wins: 0, medals: ""
-        }).then(() => alert("Perfil em análise!"));
-    }
-
-    // ADMIN FUNÇÕES
-    function postarAviso() {
+    // FUNÇÕES MASTER
+    function postarNews() {
         const txt = document.getElementById('newsTxt').value;
         if(txt) db.ref('news/').push({ texto: txt, data: new Date().toLocaleDateString() });
     }
+    function setWin(id, v) { db.ref('inscricoes/'+id).update({ wins: v + 1 }); }
+    function setVerificado(id, val) { db.ref('inscricoes/'+id).update({ verificado: val }); }
+    function banir(id) { if(confirm("Banir permanentemente?")) db.ref('inscricoes/'+id).update({ status: "banido" }); }
     function aprovar(id) { db.ref('inscricoes/'+id).update({ status: "aprovado" }); }
-    function addWin(id, v) { db.ref('inscricoes/'+id).update({ wins: v + 1 }); }
-    function darMedalha(id) { 
-        const m = prompt("Digite o emoji da medalha (🏆, ⭐, 👑):");
-        db.ref('inscricoes/'+id).update({ medals: m }); 
-    }
 
-    // LISTENER PRINCIPAL
+    // RENDERIZAÇÃO
     db.ref().on('value', snap => {
         const d = snap.val() || {};
         const atletas = d.inscricoes || {};
         const news = d.news || {};
 
-        const feed = document.getElementById('feedNews');
-        const gridT = document.getElementById('gridTimes');
-        const corpoTab = document.getElementById('corpoTabela');
-        const admAtletas = document.getElementById('adminAtletas');
+        const feedNews = document.getElementById('feedNews');
+        const rankingOrgs = document.getElementById('rankingOrgs');
+        const listaPlayers = document.getElementById('listaPlayers');
+        const adminMaster = document.getElementById('adminListaMaster');
         
-        feed.innerHTML = ""; gridT.innerHTML = ""; corpoTab.innerHTML = ""; admAtletas.innerHTML = "";
+        feedNews.innerHTML = ""; rankingOrgs.innerHTML = ""; listaPlayers.innerHTML = ""; adminMaster.innerHTML = "";
 
-        const timesMap = {};
-        const ranking = [];
+        let countAtletas = 0;
+        const orgs = {};
+        const rankingAtletas = [];
 
-        // Notícias
-        for(let id in news) {
-            feed.innerHTML = `<div class="card"><b>[${news[id].data}]</b><p>${news[id].texto}</p></div>` + feed.innerHTML;
-        }
-
-        // Processar Atletas
         for(let id in atletas) {
             const p = atletas[id];
-            if(p.status === "pendente") {
-                admAtletas.innerHTML += `<div>${p.nome} <button onclick="aprovar('${id}')">Aprovar</button></div>`;
-            } else {
-                // Mapa de Times
-                if(!timesMap[p.time]) timesMap[p.time] = { nome: p.time, logo: p.escudoURL, players: [] };
-                timesMap[p.time].players.push(p);
+            if(p.status === "banido") continue;
 
-                ranking.push({ ...p, id });
-                
-                // Controle Adm
-                admAtletas.innerHTML += `
-                    <div style="font-size:11px; margin-top:10px; border-bottom:1px solid #333; padding-bottom:5px;">
-                        ${p.nome} (${p.wins}V) 
-                        <button onclick="addWin('${id}', ${p.wins})">+1 V</button>
-                        <button onclick="darMedalha('${id}')">🏅</button>
+            if(p.status === "pendente") {
+                adminMaster.innerHTML += `<div class="card">${p.nome} <button class="btn-adm" onclick="aprovar('${id}')">APROVAR</button></div>`;
+            } else {
+                countAtletas++;
+                rankingAtletas.push({...p, id});
+
+                // Lógica de Orgs
+                if(!orgs[p.time]) orgs[p.time] = { wins: 0, players: 0, logo: p.escudoURL };
+                orgs[p.time].wins += (p.wins || 0);
+                orgs[p.time].players += 1;
+
+                // Painel Admin
+                adminMaster.innerHTML += `
+                    <div style="font-size:11px; padding:5px; border-bottom:1px solid #333;">
+                        ${p.nome} | 
+                        <button class="btn-adm" onclick="setWin('${id}', ${p.wins})">WIN</button>
+                        <button class="btn-adm" onclick="setVerificado('${id}', ${!p.verificado})">✔</button>
+                        <button class="btn-adm btn-ban" onclick="banir('${id}')">BAN</button>
                     </div>`;
             }
         }
 
-        // Grid de Times
-        for(let t in timesMap) {
-            gridT.innerHTML += `
-                <div class="team-box" onclick="verLineup('${t}')">
-                    <img src="${timesMap[t].logo}">
-                    <div style="font-weight:bold; margin-top:5px; color:var(--primary);">${t}</div>
+        // Renderizar Ranking Orgs
+        const sortOrgs = Object.keys(orgs).sort((a,b) => orgs[b].wins - orgs[a].wins);
+        sortOrgs.forEach((nome, i) => {
+            rankingOrgs.innerHTML += `
+                <div class="card" style="display:flex; align-items:center; gap:15px; border-left: 4px solid var(--primary);">
+                    <b style="color:var(--primary)">#${i+1}</b>
+                    <img src="${orgs[nome].logo}" style="width:40px;">
+                    <div style="flex-grow:1"><b>${nome}</b><br><small>${orgs[nome].players} Atletas</small></div>
+                    <div style="text-align:right"><b>${orgs[nome].wins * 3}</b><br><small>PTS</small></div>
                 </div>`;
-        }
-
-        // Ranking Tabela
-        ranking.sort((a,b) => b.wins - a.wins).forEach((a, i) => {
-            corpoTab.innerHTML += `
-                <tr style="border-bottom: 1px solid #30363d;">
-                    <td style="padding:15px 5px;">${i+1}º</td>
-                    <td><b>${a.nome}</b> <span style="font-size:10px; color:#8b949e;">${a.medals}</span></td>
-                    <td>${a.wins}</td>
-                    <td style="color:var(--primary);">${a.wins * 3} PTS</td>
-                </tr>`;
         });
 
-        window.verLineup = (timeNome) => {
-            const lista = document.getElementById('listaLineup');
-            document.getElementById('tituloLineup').innerText = "LINE-UP: " + timeNome;
-            lista.innerHTML = "";
-            timesMap[timeNome].players.forEach(p => {
-                lista.innerHTML += `
-                    <div class="player-card">
-                        <div class="player-header">
-                            <img src="${p.fotoURL}" class="player-img">
-                            <div style="text-align:left;">
-                                <div style="font-size:18px; font-weight:bold;">${p.nome} <span class="medal-icon">${p.medals}</span></div>
-                                <div style="color:var(--primary); font-size:12px;">ORG: ${p.time}</div>
-                                <a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="color:#8b949e; text-decoration:none; font-size:10px;">➔ VER TRACKER</a>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-            window.scrollTo(0, document.getElementById('tituloLineup').offsetTop - 100);
-        };
+        // Renderizar Ranking Atletas
+        rankingAtletas.sort((a,b) => b.wins - a.wins).forEach((p, i) => {
+            listaPlayers.innerHTML += `
+                <div class="p-card">
+                    <img src="${p.fotoURL}" class="p-img">
+                    <div style="flex-grow:1">
+                        <b>${p.nome}</b> ${p.verificado ? '<span class="verified-badge">●</span>' : ''}
+                        <br><small style="color:#888">${p.time}</small>
+                    </div>
+                    <div style="text-align:right">
+                        <b style="color:var(--primary)">${p.wins * 3} PTS</b>
+                        <br><a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="font-size:8px; color:#555;">TRACKER</a>
+                    </div>
+                </div>`;
+        });
+
+        // Notícias
+        for(let id in news) {
+            feedNews.innerHTML = `<div class="card" style="border-top:2px solid var(--primary)">
+                <small style="color:var(--primary)">OFFICIAL - ${news[id].data}</small>
+                <p style="margin-top:10px; font-size:14px;">${news[id].texto}</p>
+            </div>` + feedNews.innerHTML;
+        }
+
+        document.getElementById('countAtletas').innerText = countAtletas;
+        document.getElementById('countTimes').innerText = sortOrgs.length;
     });
 </script>
 </body>
