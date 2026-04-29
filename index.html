@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championship - Oficial</title>
+    <title>FTz Championship - Gestão de Atletas</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; }
+        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; }
         
-        /* Menu de Navegação */
         nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 15px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); }
         nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; }
         nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
@@ -24,9 +23,13 @@
         .card { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid #1e293b; margin-bottom: 20px; }
         h1 { color: var(--primary); text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .btn { background: var(--primary); color: #000; padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
         
-        .atleta-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; }
+        .btn { background: var(--primary); color: #000; padding: 15px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-approve { background: var(--success); color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; }
+        .btn-reject { background: var(--danger); color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; }
+        
+        .atleta-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; gap: 10px; }
+        .admin-actions { display: flex; gap: 8px; }
         .stats-btn { background: #1e293b; color: var(--primary); border: 1px solid var(--primary); padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; }
     </style>
 </head>
@@ -43,38 +46,37 @@
     <div id="home" class="page active">
         <h1>FTz CHAMPIONSHIPS</h1>
         <div class="card">
-            <p style="text-align: center; line-height: 1.6;">Bem-vindo à plataforma oficial da FTz. Aqui você pode se inscrever para os torneios e acompanhar as estatísticas integradas da Ubisoft em tempo real.</p>
-            <button class="btn" onclick="showPage('inscricao')">QUERO ME INSCREVER</button>
+            <p style="text-align: center; line-height: 1.6;">Painel de controle de atletas e estatísticas integradas.</p>
+            <button class="btn" onclick="showPage('inscricao')">NOVA INSCRIÇÃO</button>
         </div>
     </div>
 
     <div id="inscricao" class="page">
         <h1>INSCRIÇÃO</h1>
         <div class="card">
-            <label>Seu Nome de Atleta:</label>
-            <input id="atletaNome" placeholder="Ex: Shisui.FTz">
-            <label>ID Ubisoft (Para Estatísticas):</label>
-            <input id="ubiID" placeholder="Ex: TioWellison.FTZ">
-            <button class="btn" onclick="inscrever()">ENVIAR PARA ANÁLISE</button>
+            <input id="atletaNome" placeholder="Nome do Atleta (Ex: Shisui.FTz)">
+            <input id="ubiID" placeholder="ID Ubisoft (Ex: TioWellison.FTZ)">
+            <button class="btn" onclick="inscrever()">SOLICITAR ACESSO</button>
         </div>
     </div>
 
     <div id="atletas" class="page">
-        <h1>ATLETAS OFICIAIS</h1>
-        <div id="listaAtletas" class="card">Carregando jogadores...</div>
+        <h1>ATLETAS APROVADOS</h1>
+        <div id="listaAtletas" class="card">Nenhum atleta aprovado no momento.</div>
     </div>
 
     <div id="admin" class="page">
-        <h1>PAINEL ADM</h1>
-        <div class="card" style="border-color: #ef4444;">
-            <input type="password" id="adminSenha" placeholder="Digite a senha de Admin">
-            <div id="pendentes"></div>
+        <h1>PAINEL DE CONTROLE</h1>
+        <div class="card">
+            <label>Senha Administrativa:</label>
+            <input type="password" id="adminSenha" placeholder="Senha para ações">
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+            <div id="pendentes">Carregando solicitações...</div>
         </div>
     </div>
 </div>
 
 <script>
-    // CONFIGURAÇÃO DO FIREBASE (Suas chaves)
     const firebaseConfig = {
         apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
         authDomain: "ftzchampionships.firebaseapp.com",
@@ -89,7 +91,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Troca de Páginas
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -97,59 +98,72 @@
         document.getElementById('btn-' + pageId).classList.add('active');
     }
 
-    // Inscrição
     function inscrever() {
         const nome = document.getElementById('atletaNome').value;
         const ubi = document.getElementById('ubiID').value;
-        if(!nome || !ubi) return alert("Preencha todos os campos!");
+        if(!nome || !ubi) return alert("Campos obrigatórios!");
 
         db.ref('inscricoes/').push({
             nome: nome,
             ubiID: ubi,
             status: "pendente"
         }).then(() => {
-            alert("Inscrição enviada! Peça ao ADM para aprovar.");
+            alert("Pedido enviado com sucesso!");
+            document.getElementById('atletaNome').value = "";
+            document.getElementById('ubiID').value = "";
             showPage('home');
         });
     }
 
-    // Monitorar Dados
     db.ref('inscricoes/').on('value', (snapshot) => {
         const data = snapshot.val();
         const lista = document.getElementById('listaAtletas');
         const pendentesDiv = document.getElementById('pendentes');
         
         lista.innerHTML = "";
-        pendentesDiv.innerHTML = "<h3>Pendentes de Aprovação:</h3>";
+        pendentesDiv.innerHTML = "<h3>Solicitações Pendentes:</h3>";
+
+        let temAprovado = false;
+        let temPendente = false;
 
         for (let id in data) {
             const p = data[id];
             if(p.status === "aprovado") {
+                temAprovado = true;
                 lista.innerHTML += `
                 <div class="atleta-item">
-                    <div>
-                        <strong>${p.nome}</strong><br>
-                        <small style="color:#aaa">ID: ${p.ubiID}</small>
-                    </div>
-                    <a href="https://r6.tracker.network/profile/pc/${p.ubiID}" target="_blank" class="stats-btn">Ver Stats</a>
+                    <div><strong>${p.nome}</strong><br><small>ID: ${p.ubiID}</small></div>
+                    <a href="https://r6.tracker.network/profile/pc/${p.ubiID}" target="_blank" class="stats-btn">STATS</a>
                 </div>`;
-            } else {
+            } else if(p.status === "pendente") {
+                temPendente = true;
                 pendentesDiv.innerHTML += `
                 <div class="atleta-item">
                     <span>${p.nome}</span>
-                    <button class="btn" style="width:auto; padding:5px 15px;" onclick="aprovar('${id}')">Aprovar</button>
+                    <div class="admin-actions">
+                        <button class="btn-approve" onclick="decisao('${id}', 'aprovado')">Aceitar</button>
+                        <button class="btn-reject" onclick="decisao('${id}', 'recusado')">Recusar</button>
+                    </div>
                 </div>`;
             }
         }
+        if(!temAprovado) lista.innerHTML = "Nenhum atleta aprovado.";
+        if(!temPendente) pendentesDiv.innerHTML = "Não há pedidos pendentes.";
     });
 
-    // Aprovação
-    function aprovar(id) {
+    function decisao(id, acao) {
         const senha = document.getElementById('adminSenha').value;
-        if(senha !== "FTZ123") return alert("Senha Administrativa incorreta!");
-        db.ref('inscricoes/' + id).update({ status: "aprovado" });
+        if(senha !== "FTZ123") return alert("Senha incorreta!");
+
+        if(acao === "aprovado") {
+            db.ref('inscricoes/' + id).update({ status: "aprovado" });
+        } else {
+            // Se recusar, removemos do banco de dados
+            if(confirm("Deseja realmente recusar e excluir esta inscrição?")) {
+                db.ref('inscricoes/' + id).remove();
+            }
+        }
     }
 </script>
-
 </body>
 </html>
