@@ -170,13 +170,12 @@ const App = {
 
 state:{user:null,admin:false},
 
-init(){
-firebase.initializeApp({
-apiKey:"SUA_API_KEY",
-authDomain:"SEU_AUTH",
-databaseURL:"SEU_DB",
-projectId:"SEU_ID"
-});
+const firebaseConfig = {
+  apiKey:"SUA_API_KEY",
+  authDomain:"SEU_AUTH",
+  databaseURL:"SEU_DB",
+  projectId:"SEU_ID"
+};
 
 this.auth = firebase.auth();
 this.db = firebase.database();
