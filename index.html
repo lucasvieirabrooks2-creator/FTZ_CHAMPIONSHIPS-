@@ -112,4 +112,96 @@ function login(){
     .catch(()=>auth.createUserWithEmailAndPassword(email.value, senha.value));
 }
 
-function
+function logout(){ auth.signOut(); }
+
+// USUÁRIO
+auth.onAuthStateChanged(user=>{
+if(user){
+
+authDiv.style.display="none";
+app.classList.remove("hidden");
+userEmail.innerText=user.email;
+
+const ref=db.ref("users/"+user.uid);
+
+ref.once("value",snap=>{
+if(!snap.exists()){
+ref.set({email:user.email, role:"player"});
+}
+});
+
+ref.on("value",snap=>{
+const data=snap.val();
+if(data.role==="admin"){
+isAdmin=true;
+btnAdmin.classList.remove("hidden");
+}
+});
+
+}else{
+authDiv.style.display="block";
+app.classList.add("hidden");
+}
+});
+
+// NAVEGAÇÃO
+function show(p){
+document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
+document.getElementById(p).classList.remove("hidden");
+}
+
+// ADMIN
+function criarTorneio(){
+if(!isAdmin) return alert("Sem permissão");
+
+db.ref("torneios").push({
+nome:nomeTorneio.value,
+premio:premio.value,
+modo:modo.value
+});
+
+alert("Torneio criado!");
+}
+
+// LISTAR TORNEIOS
+db.ref("torneios").on("value",snap=>{
+const data=snap.val()||{};
+listaTorneios.innerHTML="";
+
+Object.entries(data).forEach(([id,t])=>{
+listaTorneios.innerHTML+=`
+<div class="item">
+<b>${t.nome}</b><br>
+Premio: ${t.premio}<br>
+Modo: ${t.modo}<br>
+<button onclick="inscrever('${id}')">Participar</button>
+</div>`;
+});
+});
+
+// INSCREVER
+function inscrever(id){
+const user=auth.currentUser;
+
+db.ref("inscricoes").push({
+torneio:id,
+user:user.uid
+});
+
+alert("Inscrito!");
+}
+
+// FEED SIMPLES
+db.ref("feed").on("value",snap=>{
+const data=snap.val()||{};
+feed.innerHTML="";
+
+Object.values(data).reverse().forEach(n=>{
+feed.innerHTML+=`<div class="item">${n.texto}</div>`;
+});
+});
+
+</script>
+
+</body>
+</html>
