@@ -3,18 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FTz Pro System</title>
+<title>FTz Ultra App</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
 <style>
-body{margin:0;background:#0b0f14;color:#fff;font-family:Arial}
+body{margin:0;background:#0b0f14;color:#fff;font-family:sans-serif}
 .container{padding:15px}
-.card{background:#111827;padding:15px;border-radius:10px;margin-bottom:15px}
+.card{background:#111827;padding:15px;border-radius:12px;margin-bottom:15px}
 input,select,textarea{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff}
-button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
+button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold;border-radius:8px}
 .nav{display:flex;gap:5px;overflow:auto;margin-bottom:10px}
 .nav button{flex:1;background:#111}
 .hidden{display:none}
@@ -26,13 +29,13 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 
 <div class="container">
 
-<!-- AUTH -->
+<!-- LOGIN -->
 <div id="auth">
 <div class="card">
 <h3>Login</h3>
-<input id="email" placeholder="Email">
+<input id="email">
 <input id="senha" type="password">
-<button onclick="Auth.login()">Entrar</button>
+<button onclick="App.Auth.login()">Entrar</button>
 </div>
 </div>
 
@@ -40,60 +43,53 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 <div id="app" class="hidden">
 
 <div class="nav">
-<button onclick="UI.show('times')">Times</button>
-<button onclick="UI.show('torneios')">Torneios</button>
-<button onclick="UI.show('partidas')">Partidas</button>
-<button onclick="UI.show('ranking')">Ranking</button>
-<button onclick="UI.show('admin')" id="btnAdmin" class="hidden">Admin</button>
+<button onclick="App.UI.go('teams')">Times</button>
+<button onclick="App.UI.go('tournaments')">Torneios</button>
+<button onclick="App.UI.go('matches')">Partidas</button>
+<button onclick="App.UI.go('ranking')">Ranking</button>
+<button onclick="App.UI.go('admin')" id="btnAdmin" class="hidden">Admin</button>
 </div>
 
 <!-- TIMES -->
-<div id="times" class="page">
+<div id="teams" class="page">
 <div class="card">
-<h3>Criar Time</h3>
-<input id="teamName">
-<input id="tag">
-<textarea id="players"></textarea>
-<button onclick="Teams.create()">Criar</button>
+<input id="teamName" placeholder="Nome">
+<input id="tag" placeholder="TAG">
+<textarea id="players" placeholder="5 players"></textarea>
+<button onclick="App.Teams.create()">Criar</button>
 </div>
-<div class="card"><div id="listaTimes"></div></div>
+<div class="card"><div id="teamList"></div></div>
 </div>
 
-<!-- TORNEIOS -->
-<div id="torneios" class="page hidden">
-<div class="card"><div id="listaTorneios"></div></div>
-</div>
-
-<!-- PARTIDAS -->
-<div id="partidas" class="page hidden">
+<!-- MATCHES -->
+<div id="matches" class="page hidden">
 <div class="card">
-<select id="time1"></select>
-<select id="time2"></select>
-<select id="mapa">
+<select id="t1"></select>
+<select id="t2"></select>
+<select id="map">
 <option>Oregon</option>
 <option>Clubhouse</option>
 <option>Bank</option>
 </select>
-<input id="score1">
-<input id="score2">
+<input id="s1">
+<input id="s2">
 <input id="mvp">
-<button onclick="Match.create()">Registrar</button>
+<button onclick="App.Match.create()">Registrar</button>
+</div>
+<div class="card"><div id="history"></div></div>
 </div>
 
-<div class="card"><div id="historico"></div></div>
-</div>
-
-<!-- RANKING -->
+<!-- RANK -->
 <div id="ranking" class="page hidden">
-<div class="card"><div id="rankingList"></div></div>
+<div class="card"><div id="rank"></div></div>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" class="page hidden">
 <div class="card">
-<input id="nomeTorneio">
-<button onclick="Tournament.create()">Criar Torneio</button>
-<button onclick="Tournament.bracket()">Gerar Chaveamento</button>
+<input id="tournamentName">
+<button onclick="App.Tournament.create()">Criar Torneio</button>
+<button onclick="App.Tournament.bracket()">Gerar Chaveamento</button>
 </div>
 </div>
 
@@ -102,185 +98,161 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 
 <script>
 
-/* ================= CONFIG ================= */
-const firebaseConfig = {
+// ================= CORE =================
+const App = {
+ state:{user:null,admin:false},
+
+ init(){
+ firebase.initializeApp({
  apiKey:"SUA_KEY",
  authDomain:"SEU_AUTH",
  databaseURL:"SEU_DB",
  projectId:"SEU_ID"
-};
+ });
 
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
+ this.auth=firebase.auth();
+ this.db=firebase.database();
 
-/* ================= STATE ================= */
-let state={
- user:null,
- admin:false
-};
-
-/* ================= AUTH ================= */
-const Auth={
- login(){
- auth.signInWithEmailAndPassword(email.value,senha.value)
- .catch(()=>auth.createUserWithEmailAndPassword(email.value,senha.value));
+ this.bindAuth();
+ this.loadData();
  },
- logout(){auth.signOut();}
-};
 
-auth.onAuthStateChanged(user=>{
-if(user){
-state.user=user;
-authDiv.style.display="none";
-app.classList.remove("hidden");
+ bindAuth(){
+ this.auth.onAuthStateChanged(user=>{
+ if(user){
+ this.state.user=user;
+ authDiv.style.display="none";
+ app.classList.remove("hidden");
 
-const ref=db.ref("users/"+user.uid);
+ const ref=this.db.ref("users/"+user.uid);
 
-ref.once("value",snap=>{
-if(!snap.exists()){
-ref.set({role:"player"});
-}
-});
+ ref.once("value",s=>{
+ if(!s.exists()) ref.set({role:"player"});
+ });
 
-ref.on("value",snap=>{
-state.admin=snap.val().role==="admin";
-btnAdmin.classList.toggle("hidden",!state.admin);
-});
+ ref.on("value",s=>{
+ this.state.admin=s.val().role==="admin";
+ btnAdmin.classList.toggle("hidden",!this.state.admin);
+ });
 
-Teams.load();
-}else{
-authDiv.style.display="block";
-app.classList.add("hidden");
-}
-});
+ }else{
+ authDiv.style.display="block";
+ app.classList.add("hidden");
+ }
+ });
+ },
 
-/* ================= UI ================= */
-const UI={
- show(p){
+ // ================= AUTH =================
+ Auth:{
+ login(){
+ App.auth.signInWithEmailAndPassword(email.value,senha.value)
+ .catch(()=>App.auth.createUserWithEmailAndPassword(email.value,senha.value));
+ }
+ },
+
+ // ================= UI =================
+ UI:{
+ go(p){
  document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
  document.getElementById(p).classList.remove("hidden");
  }
-};
+ },
 
-/* ================= TEAMS ================= */
-const Teams={
+ // ================= TEAMS =================
+ Teams:{
  create(){
- db.ref("times").push({
+ App.db.ref("teams").push({
  nome:teamName.value,
  tag:tag.value,
  players:players.value.split(","),
- owner:state.user.uid,
+ owner:App.state.user.uid,
  wins:0
  });
+ }
  },
- load(){
- db.ref("times").on("value",snap=>{
- const data=snap.val()||{};
- listaTimes.innerHTML="";
- 
- Object.entries(data).forEach(([id,t])=>{
- if(t.owner===state.user.uid){
- listaTimes.innerHTML+=`
- <div class="item">
- ${t.tag} ${t.nome}
- <button onclick="Tournament.join('${id}')">Inscrever</button>
- </div>`;
- }
- });
- });
- }
-};
 
-/* ================= TOURNAMENT ================= */
-const Tournament={
+ // ================= TOURNAMENT =================
+ Tournament:{
  create(){
- if(!state.admin)return;
- db.ref("torneios").push({nome:nomeTorneio.value});
- },
- join(teamId){
- db.ref("inscricoes").push({team:teamId});
+ if(!App.state.admin)return;
+ App.db.ref("tournaments").push({nome:tournamentName.value});
  },
  bracket(){
- db.ref("inscricoes").once("value",snap=>{
- const ins=Object.values(snap.val()||{});
- let partidas=[];
+ App.db.ref("inscricoes").once("s=>{
+ const ins=Object.values(s.val()||{});
+ let p=[];
  for(let i=0;i<ins.length;i+=2){
- if(ins[i+1]){
- partidas.push({t1:ins[i].team,t2:ins[i+1].team});
+ if(ins[i+1]) p.push({t1:ins[i].team,t2:ins[i+1].team});
  }
- }
- db.ref("partidas").set(partidas);
+ App.db.ref("matches").set(p);
  });
  }
-};
+ },
 
-/* ================= MATCH ================= */
-const Match={
+ // ================= MATCH =================
+ Match:{
  create(){
- if(!state.admin)return;
+ if(!App.state.admin)return;
 
- const t1=time1.value;
- const t2=time2.value;
- const s1=parseInt(score1.value);
- const s2=parseInt(score2.value);
+ const winner = s1.value > s2.value ? t1.value : t2.value;
 
- const winner=s1>s2?t1:t2;
-
- db.ref("historico").push({
- t1,t2,mapa:mapa.value,
- score1:s1,score2:s2,
+ App.db.ref("history").push({
+ t1:t1.value,t2:t2.value,
+ map:map.value,
+ s1:s1.value,s2:s2.value,
  mvp:mvp.value,
  winner
  });
 
- db.ref("times/"+winner+"/wins")
+ App.db.ref("teams/"+winner+"/wins")
  .transaction(x=>(x||0)+1);
  }
+ },
+
+ // ================= DATA =================
+ loadData(){
+
+ // teams
+ this.db.ref("teams").on("value",snap=>{
+ const d=snap.val()||{};
+ t1.innerHTML=""; t2.innerHTML="";
+ teamList.innerHTML="";
+
+ Object.entries(d).forEach(([id,t])=>{
+ t1.innerHTML+=`<option value="${id}">${t.nome}</option>`;
+ t2.innerHTML+=`<option value="${id}">${t.nome}</option>`;
+ teamList.innerHTML+=`<div class="item">${t.tag} ${t.nome}</div>`;
+ });
+ });
+
+ // history
+ this.db.ref("history").on("value",snap=>{
+ const d=snap.val()||{};
+ history.innerHTML="";
+ Object.values(d).reverse().forEach(p=>{
+ history.innerHTML+=`
+ <div class="item">
+ ${p.map} | ${p.s1}x${p.s2} | MVP: ${p.mvp}
+ </div>`;
+ });
+ });
+
+ // ranking
+ this.db.ref("teams").on("value",snap=>{
+ const d=Object.values(snap.val()||{}).sort((a,b)=>b.wins-a.wins);
+ rank.innerHTML="";
+ d.forEach((t,i)=>{
+ rank.innerHTML+=`<div class="item">#${i+1} ${t.nome} - ${t.wins}</div>`;
+ });
+ });
+
+ }
+
 };
 
-/* ================= DATA LOAD ================= */
-
-// SELECT TIMES
-db.ref("times").on("value",snap=>{
-const data=snap.val()||{};
-time1.innerHTML="";
-time2.innerHTML="";
-Object.entries(data).forEach(([id,t])=>{
-time1.innerHTML+=`<option value="${id}">${t.nome}</option>`;
-time2.innerHTML+=`<option value="${id}">${t.nome}</option>`;
-});
-});
-
-// HISTÓRICO
-db.ref("historico").on("value",snap=>{
-const data=snap.val()||{};
-db.ref("times").once("value",ts=>{
-const times=ts.val()||{};
-historico.innerHTML="";
-Object.values(data).reverse().forEach(p=>{
-historico.innerHTML+=`
-<div class="item">
-${times[p.t1]?.nome} ${p.score1}x${p.score2} ${times[p.t2]?.nome}
-<br>Mapa: ${p.mapa} | MVP: ${p.mvp}
-</div>`;
-});
-});
-});
-
-// RANKING
-db.ref("times").on("value",snap=>{
-const data=snap.val()||{};
-const list=Object.values(data).sort((a,b)=>b.wins-a.wins);
-rankingList.innerHTML="";
-list.forEach((t,i)=>{
-rankingList.innerHTML+=`
-<div class="item">
-#${i+1} ${t.tag} ${t.nome} - ${t.wins}
-</div>`;
-});
-});
+App.init();
 
 </script>
+
 </body>
 </html>
