@@ -3,54 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FTz PRO System</title>
+<title>FTz Championship PRO</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
 <style>
-body {
-    margin:0;
-    font-family: Arial;
-    background:#0b0f14;
-    color:white;
-}
-
-.container {
-    padding:15px;
-}
-
-.card {
-    background:#111827;
-    padding:15px;
-    border-radius:10px;
-    margin-bottom:15px;
-}
-
-input {
-    width:100%;
-    padding:10px;
-    margin:5px 0;
-    background:#000;
-    border:1px solid #333;
-    color:white;
-}
-
-button {
-    width:100%;
-    padding:12px;
-    background:#00eaff;
-    border:none;
-    font-weight:bold;
-}
-
-.ranking {
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    border-bottom:1px solid #222;
-}
+body{margin:0;background:#0b0f14;color:white;font-family:Arial}
+.container{padding:15px}
+.card{background:#111827;padding:15px;border-radius:10px;margin-bottom:15px}
+input,select{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:white}
+button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
+.nav{display:flex;gap:5px;overflow:auto;margin-bottom:10px}
+.nav button{flex:1;background:#111}
+.hidden{display:none}
+.item{padding:10px;border-bottom:1px solid #222}
 </style>
 </head>
 
@@ -58,33 +26,64 @@ button {
 
 <div class="container">
 
+<!-- LOGIN -->
 <div id="auth">
-    <div class="card">
-        <h3>Login / Cadastro</h3>
-        <input id="email" placeholder="Email">
-        <input id="senha" type="password" placeholder="Senha">
-        <button onclick="login()">Entrar / Criar</button>
-    </div>
+<div class="card">
+<h3>Login / Cadastro</h3>
+<input id="email" placeholder="Email">
+<input id="senha" type="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+</div>
 </div>
 
-<div id="app" style="display:none;">
+<!-- APP -->
+<div id="app" class="hidden">
 
-    <div class="card">
-        <h3>Meu Perfil</h3>
-        <p id="userEmail"></p>
-        <p>Vitórias: <span id="wins">0</span></p>
-        <button onclick="logout()">Sair</button>
-    </div>
+<div class="nav">
+<button onclick="show('home')">Home</button>
+<button onclick="show('torneios')">Torneios</button>
+<button onclick="show('perfil')">Perfil</button>
+<button onclick="show('admin')" id="btnAdmin" class="hidden">Admin</button>
+</div>
 
-    <div class="card">
-        <h3>Adicionar Vitória</h3>
-        <button onclick="addWin()">+1 Win</button>
-    </div>
+<!-- HOME -->
+<div id="home" class="page">
+<div class="card">
+<h3>Feed</h3>
+<div id="feed"></div>
+</div>
+</div>
 
-    <div class="card">
-        <h3>Ranking</h3>
-        <div id="ranking"></div>
-    </div>
+<!-- TORNEIOS -->
+<div id="torneios" class="page hidden">
+<div class="card">
+<h3>Torneios</h3>
+<div id="listaTorneios"></div>
+</div>
+</div>
+
+<!-- PERFIL -->
+<div id="perfil" class="page hidden">
+<div class="card">
+<h3>Meu Perfil</h3>
+<p id="userEmail"></p>
+<button onclick="logout()">Sair</button>
+</div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="page hidden">
+<div class="card">
+<h3>Criar Torneio</h3>
+<input id="nomeTorneio" placeholder="Nome">
+<input id="premio" placeholder="Premiação">
+<select id="modo">
+<option>Mata-mata</option>
+<option>Liga</option>
+</select>
+<button onclick="criarTorneio()">Criar</button>
+</div>
+</div>
 
 </div>
 
@@ -92,7 +91,7 @@ button {
 
 <script>
 
-// COLE SEU FIREBASE AQUI
+// CONFIG FIREBASE
 const firebaseConfig = {
   apiKey: "SUA_KEY",
   authDomain: "SEU_AUTH",
@@ -105,74 +104,12 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// LOGIN / CADASTRO
+let isAdmin = false;
+
+// LOGIN
 function login(){
-    const email = emailInput.value;
-    const senha = senhaInput.value;
-
-    auth.signInWithEmailAndPassword(email, senha)
-    .catch(()=>{
-        auth.createUserWithEmailAndPassword(email, senha);
-    });
+    auth.signInWithEmailAndPassword(email.value, senha.value)
+    .catch(()=>auth.createUserWithEmailAndPassword(email.value, senha.value));
 }
 
-function logout(){
-    auth.signOut();
-}
-
-// USUÁRIO LOGADO
-auth.onAuthStateChanged(user=>{
-    if(user){
-        authDiv.style.display="none";
-        app.style.display="block";
-
-        userEmail.innerText = user.email;
-
-        const ref = db.ref("users/"+user.uid);
-
-        ref.once("value", snap=>{
-            if(!snap.exists()){
-                ref.set({wins:0});
-            }
-        });
-
-        ref.on("value", snap=>{
-            wins.innerText = snap.val().wins || 0;
-        });
-
-    } else {
-        authDiv.style.display="block";
-        app.style.display="none";
-    }
-});
-
-// ADD WIN
-function addWin(){
-    const user = auth.currentUser;
-    const ref = db.ref("users/"+user.uid+"/wins");
-
-    ref.transaction(v => (v || 0) + 1);
-}
-
-// RANKING REALTIME
-db.ref("users").on("value", snap=>{
-    const data = snap.val() || {};
-    const list = Object.entries(data)
-        .map(([id,u]) => ({id,...u}))
-        .sort((a,b)=>b.wins-a.wins);
-
-    ranking.innerHTML = "";
-
-    list.forEach((u,i)=>{
-        ranking.innerHTML += `
-        <div class="ranking">
-            <span>#${i+1}</span>
-            <span>${u.wins} wins</span>
-        </div>`;
-    });
-});
-
-</script>
-
-</body>
-</html>
+function
