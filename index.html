@@ -12,7 +12,7 @@
         .card { background: #111827; margin: 15px; padding: 20px; border-radius: 12px; border: 1px solid #1e293b; }
         input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; }
         .btn { background: var(--p); color: #000; padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 90%; }
-        .status-badge { font-size: 0.8em; padding: 4px 8px; border-radius: 4px; background: #334155; }
+        .status-badge { font-size: 0.8em; padding: 4px 8px; border-radius: 4px; background: #334155; margin-top: 5px; display: inline-block; }
         .approved { color: #4ade80; border: 1px solid #4ade80; }
     </style>
 </head>
@@ -42,38 +42,37 @@
 </div>
 
 <script>
-    // PASSO 1: Substitua pelos dados do SEU Firebase (Configurações do Projeto > Seus Apps)
+    // Suas chaves atualizadas
     const firebaseConfig = {
-        apiKey: "COLE_AQUI",
-        authDomain: "COLE_AQUI",
-        databaseURL: "COLE_AQUI",
-        projectId: "COLE_AQUI",
-        storageBucket: "COLE_AQUI",
-        messagingSenderId: "COLE_AQUI",
-        appId: "COLE_AQUI"
+        apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
+        authDomain: "ftzchampionships.firebaseapp.com",
+        projectId: "ftzchampionships",
+        storageBucket: "ftzchampionships.firebasestorage.app",
+        messagingSenderId: "241465233774",
+        appId: "1:241465233774:web:877740ce39f06443acf17f",
+        measurementId: "G-8N28DNQEGN"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Função para o Atleta se inscrever
     function inscrever() {
         const nome = document.getElementById('atletaNome').value;
         const ubi = document.getElementById('ubiID').value;
-        if(!nome || !ubi) return alert("Por favor, preencha todos os campos!");
+        if(!nome || !ubi) return alert("Preencha todos os campos!");
 
         db.ref('inscricoes/').push({
             nome: nome,
             ubiID: ubi,
             status: "pendente",
             data: new Date().toLocaleDateString()
+        }).then(() => {
+            alert("Inscrição enviada! Aguarde a aprovação.");
+            document.getElementById('atletaNome').value = "";
+            document.getElementById('ubiID').value = "";
         });
-        alert("Inscrição enviada com sucesso! Aguarde a aprovação do ADM.");
-        document.getElementById('atletaNome').value = "";
-        document.getElementById('ubiID').value = "";
     }
 
-    // Monitorar e Atualizar Listas
     db.ref('inscricoes/').on('value', (snapshot) => {
         const data = snapshot.val();
         const lista = document.getElementById('listaAtletas');
@@ -82,34 +81,30 @@
         pendentesDiv.innerHTML = "<h4>Aguardando Aprovação:</h4>";
 
         if(!data) {
-            lista.innerHTML = "Nenhum atleta aprovado ainda.";
+            lista.innerHTML = "Nenhum atleta aprovado.";
             return;
         }
 
         for (let id in data) {
-            const player = data[id];
-            if(player.status === "aprovado") {
+            const p = data[id];
+            if(p.status === "aprovado") {
                 lista.innerHTML += `<div style="margin:10px; border-bottom:1px solid #1e293b; padding:10px;">
-                    <strong>${player.nome}</strong> <br>
-                    <span class="status-badge approved">Ubisoft ID: ${player.ubiID} (Stats Integradas)</span>
+                    <strong>${p.nome}</strong> <br>
+                    <span class="status-badge approved">ID Ubisoft: ${p.ubiID}</span>
                 </div>`;
             } else {
                 pendentesDiv.innerHTML += `<div style="padding:10px;">
-                    ${player.nome} (${player.ubiID}) 
+                    ${p.nome} (${p.ubiID}) 
                     <button class="btn" style="width:auto; padding:5px 10px;" onclick="aprovar('${id}')">Aprovar</button>
                 </div>`;
             }
         }
     });
 
-    // Função para o ADM aprovar
     function aprovar(id) {
         const senha = document.getElementById('adminSenha').value;
-        if(senha !== "FTZ123") return alert("Senha de Administrador incorreta!");
-        
-        db.ref('inscricoes/' + id).update({ status: "aprovado" })
-        .then(() => alert("Atleta aprovado e integrado!"))
-        .catch((error) => alert("Erro: " + error.message));
+        if(senha !== "FTZ123") return alert("Senha incorreta!");
+        db.ref('inscricoes/' + id).update({ status: "aprovado" });
     }
 </script>
 </body>
