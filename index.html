@@ -15,105 +15,90 @@
         nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
         .container { padding: 20px; max-width: 600px; margin: auto; }
-        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; position: relative; overflow: hidden; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; position: relative; }
         h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
         
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
         .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; transition: 0.3s; }
-        .btn:hover { filter: brightness(1.2); transform: scale(1.02); }
-        .btn-danger { background: var(--danger); color: white; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 10px; }
         
-        /* Estilo Card Jogador */
-        .player-card { background: linear-gradient(135deg, #111827 0%, #000 100%); border: 2px solid var(--primary); border-radius: 20px; padding: 25px; text-align: center; position: relative; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1); }
-        .player-photo { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; margin-bottom: 10px; }
-        .team-shield { width: 45px; height: 45px; position: absolute; top: 15px; right: 15px; border-radius: 8px; background: #000; padding: 2px; border: 1px solid #333; }
-        
-        .badge { background: var(--primary); color: #000; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
+        /* Grid de Times */
+        .teams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .team-card { background: #000; border: 1px solid #1e293b; border-radius: 15px; padding: 15px; text-align: center; transition: 0.3s; }
+        .team-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .team-card img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
+
+        /* Card Jogador Estilizado */
+        .player-card { background: linear-gradient(135deg, #111827 0%, #000 100%); border: 1px solid #1e293b; border-left: 4px solid var(--primary); border-radius: 10px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .player-photo-mini { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .player-info { text-align: left; flex-grow: 1; }
+        .player-info b { font-size: 16px; color: var(--primary); }
+        .player-info p { margin: 0; font-size: 11px; color: #888; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; color: var(--primary); font-size: 11px; padding: 10px; border-bottom: 2px solid #1e293b; }
         td { padding: 12px 10px; border-bottom: 1px solid #1e293b; font-size: 14px; }
-
-        .news-card { border-left: 4px solid var(--primary); background: #1a2236; padding: 15px; border-radius: 0 10px 10px 0; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <nav>
-    <button onclick="showPage('home')" id="btn-home" class="active">Início</button>
-    <button onclick="showPage('cadastro')" id="btn-cadastro">Meu Perfil</button>
-    <button onclick="showPage('competicoes')" id="btn-competicoes">Eventos</button>
+    <button onclick="showPage('home')" id="btn-home" class="active">Home</button>
+    <button onclick="showPage('cadastro')" id="btn-cadastro">Cadastro</button>
+    <button onclick="showPage('times')" id="btn-times">Equipes</button>
     <button onclick="showPage('tabela')" id="btn-tabela">Ranking</button>
     <button onclick="showPage('admin')" id="btn-admin">ADM</button>
 </nav>
 
 <div class="container">
     <div id="home" class="page active">
-        <h1>FTz Championships</h1>
+        <h1>FTz Hub</h1>
         <div id="listaNews"></div>
-        <div class="card" style="text-align: center; border-style: dashed; border-color: #334155;">
-            <p style="color: #888;">Nenhuma notícia importante no momento.</p>
+        <div class="card" style="text-align: center;">
+            <p>Seja bem-vindo ao painel competitivo da FTz.</p>
+            <button class="btn" onclick="showPage('cadastro')">CRIAR MEU PERFIL</button>
         </div>
     </div>
 
     <div id="cadastro" class="page">
-        <h2>Criar Perfil Atleta</h2>
+        <h2>Registro de Atleta</h2>
         <div class="card">
-            <input id="pNome" placeholder="Nickname Oficial">
-            <input id="pTime" placeholder="Nome da Line/Equipe">
-            <input id="pUbi" placeholder="ID Tracker.gg (Apenas o código final)">
-            <input id="pFotoURL" placeholder="Link da Foto (Opcional)">
-            <input id="pEscudoURL" placeholder="Link do Escudo Time (Opcional)">
-            <button class="btn" onclick="salvarPerfil()">SOLICITAR REGISTRO</button>
+            <input id="pNome" placeholder="Seu Nickname">
+            <input id="pTime" placeholder="Nome da Equipe (Ex: FTz Gaming)">
+            <input id="pUbi" placeholder="ID Tracker.gg">
+            <input id="pFotoURL" placeholder="Link da sua Foto (Opcional)">
+            <input id="pEscudoURL" placeholder="Link do Escudo do Time (Opcional)">
+            <button class="btn" onclick="salvarPerfil()">REGISTRAR</button>
         </div>
     </div>
 
-    <div id="competicoes" class="page">
-        <h2>Torneios & Ligas</h2>
-        <div id="listaCompeticoes"></div>
+    <div id="times" class="page">
+        <h2>Organizações & Lines</h2>
+        <div id="gridTimes" class="teams-grid"></div>
     </div>
 
     <div id="tabela" class="page">
-        <h2>Classificação de Elite</h2>
-        <div id="listaAtletas"></div>
+        <h2>Ranking Geral</h2>
         <div class="card">
-            <h3>Tabela de Pontos (LDB)</h3>
             <table>
-                <thead><tr><th>#</th><th>Atleta</th><th>PTS</th><th>VIT</th></tr></thead>
+                <thead><tr><th>#</th><th>Jogador</th><th>Time</th><th>PTS</th></tr></thead>
                 <tbody id="corpoTabela"></tbody>
             </table>
         </div>
+        <h3>Todos os Atletas</h3>
+        <div id="listaAtletas"></div>
     </div>
 
     <div id="admin" class="page">
-        <h1>Painel de Controle</h1>
+        <h1>ADM Panel</h1>
         <div class="card">
-            <input type="password" id="adminSenha" placeholder="Chave Administrativa">
-            
-            <div class="card" style="border-color: var(--primary);">
-                <h3>Postar Notícia</h3>
-                <textarea id="newsTexto" placeholder="Escreva o aviso para os jogadores..."></textarea>
-                <button class="btn" onclick="postarNews()">POSTAR NO INÍCIO</button>
-            </div>
-
+            <input type="password" id="adminSenha" placeholder="Senha">
             <div class="card">
-                <h3>Novo Evento</h3>
-                <input id="compNome" placeholder="Nome do Campeonato">
-                <button class="btn" onclick="criarEvento()">PUBLICAR EVENTO</button>
-            </div>
-
-            <div class="card">
-                <h3>Aprovar Atletas & Gerenciar Pontos</h3>
+                <h3>Ações</h3>
                 <div id="listaAdminAtletas"></div>
-            </div>
-
-            <div class="card">
-                <h3>Remover Eventos</h3>
-                <div id="adminListaEventos"></div>
             </div>
         </div>
     </div>
@@ -145,85 +130,75 @@
 
     function salvarPerfil() {
         const nome = document.getElementById('pNome').value;
-        const ubi = document.getElementById('pUbi').value;
-        if(!nome || !ubi) return alert("Nickname e ID Tracker são obrigatórios!");
-
+        if(!nome) return alert("Nick é obrigatório!");
         db.ref('inscricoes/').push({
-            nome, ubiID: ubi,
-            time: document.getElementById('pTime').value || "FREE AGENT",
+            nome, ubiID: document.getElementById('pUbi').value,
+            time: document.getElementById('pTime').value || "Sem Time",
             fotoURL: document.getElementById('pFotoURL').value || FOTO_PADRAO,
             escudoURL: document.getElementById('pEscudoURL').value || ESCUDO_PADRAO,
             status: "pendente", wins: 0
-        }).then(() => { alert("Perfil enviado para análise!"); showPage('home'); });
-    }
-
-    // FUNÇÕES ADM
-    function postarNews() {
-        const txt = document.getElementById('newsTexto').value;
-        if(txt) db.ref('news/').push({ texto: txt, data: new Date().toLocaleDateString() });
-    }
-
-    function criarEvento() {
-        const nome = document.getElementById('compNome').value;
-        if(nome) db.ref('eventos/').push({ nome });
+        }).then(() => alert("Enviado para aprovação!"));
     }
 
     function aprovar(id) { db.ref('inscricoes/'+id).update({ status: "aprovado" }); }
     function addWin(id, atual) { db.ref('inscricoes/'+id).update({ wins: (atual || 0) + 1 }); }
-    function excluirEv(id) { db.ref('eventos/'+id).remove(); }
 
-    // RENDERIZAÇÃO REALTIME
     db.ref().on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const atletas = data.inscricoes || {};
-        const eventos = data.eventos || {};
-        const news = data.news || {};
+        
+        const gridTimes = document.getElementById('gridTimes');
+        const listaAtletas = document.getElementById('listaAtletas');
+        const corpoTabela = document.getElementById('corpoTabela');
+        const listaAdmin = document.getElementById('listaAdminAtletas');
 
-        // Limpar tudo
-        document.getElementById('listaNews').innerHTML = "";
-        document.getElementById('listaAtletas').innerHTML = "";
-        document.getElementById('corpoTabela').innerHTML = "";
-        document.getElementById('listaCompeticoes').innerHTML = "";
-        document.getElementById('listaAdminAtletas').innerHTML = "";
-        document.getElementById('adminListaEventos').innerHTML = "";
+        gridTimes.innerHTML = ""; listaAtletas.innerHTML = ""; corpoTabela.innerHTML = ""; listaAdmin.innerHTML = "";
 
-        // News
-        for(let id in news) {
-            document.getElementById('listaNews').innerHTML = `<div class="news-card"><small>${news[id].data}</small><p>${news[id].texto}</p></div>` + document.getElementById('listaNews').innerHTML;
-        }
-
-        // Eventos
-        for(let id in eventos) {
-            document.getElementById('listaCompeticoes').innerHTML += `<div class="card"><h3>${eventos[id].nome}</h3><button class="btn">INSCREVER LINE</button></div>`;
-            document.getElementById('adminListaEventos').innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${eventos[id].nome}</span><button class="btn-danger" onclick="excluirEv('${id}')">X</button></div>`;
-        }
-
+        const timesMap = {}; // Para agrupar jogadores por time
         const ranking = [];
+
         for(let id in atletas) {
             const p = atletas[id];
+            
             if(p.status === "pendente") {
-                document.getElementById('listaAdminAtletas').innerHTML += `<div class="card" style="background:#1a2236;">${p.nome} <button class="btn" onclick="aprovar('${id}')">APROVAR JOGADOR</button></div>`;
+                listaAdmin.innerHTML += `<div>${p.nome} <button onclick="aprovar('${id}')">Aprovar</button></div>`;
             } else {
-                // Cards de Jogadores
-                document.getElementById('listaAtletas').innerHTML += `
+                // Organizar Times
+                if(!timesMap[p.time]) {
+                    timesMap[p.time] = { nome: p.time, escudo: p.escudoURL, jogadores: [] };
+                }
+                timesMap[p.time].jogadores.push(p.nome);
+
+                // Listar Atletas
+                listaAtletas.innerHTML += `
                     <div class="player-card">
-                        <span class="badge">MEMBRO FTZ</span>
-                        <img src="${p.escudoURL}" class="team-shield">
-                        <img src="${p.fotoURL}" class="player-photo">
-                        <div style="font-size:24px; font-weight:bold; color:var(--primary);">${p.nome}</div>
-                        <div style="color:#888; margin-bottom:10px;">${p.time}</div>
-                        <a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" class="btn" style="padding:8px; font-size:12px;">ESTATÍSTICAS UBISOFT</a>
+                        <img src="${p.fotoURL}" class="player-photo-mini">
+                        <div class="player-info">
+                            <b>${p.nome}</b>
+                            <p>${p.time}</p>
+                        </div>
+                        <a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" style="color:var(--primary); font-size:10px;">STATS</a>
                     </div>`;
-                
-                // Admin Adicionar Vitórias
-                document.getElementById('listaAdminAtletas').innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333;"><span>${p.nome} (${p.wins || 0}V)</span><button class="btn" style="width:100px; margin:0; font-size:10px;" onclick="addWin('${id}', ${p.wins})">+1 VITÓRIA</button></div>`;
-                
-                ranking.push({ nome: p.nome, pts: (p.wins || 0) * 3, v: p.wins || 0 });
+
+                ranking.push({ nome: p.nome, time: p.time, pts: (p.wins || 0) * 3, v: p.wins || 0, id: id, wins: p.wins });
+                listaAdmin.innerHTML += `<div style="font-size:12px; margin-top:5px;">${p.nome} (${p.wins}V) <button onclick="addWin('${id}', ${p.wins})">+1</button></div>`;
             }
         }
 
+        // Renderizar Grid de Times
+        for(let t in timesMap) {
+            const time = timesMap[t];
+            gridTimes.innerHTML += `
+                <div class="team-card">
+                    <img src="${time.escudo}">
+                    <div style="font-weight:bold; color:var(--primary); font-size:14px;">${time.nome}</div>
+                    <div style="font-size:10px; color:#888;">${time.jogadores.length} Jogadores</div>
+                </div>`;
+        }
+
+        // Tabela de Classificação
         ranking.sort((a,b) => b.pts - a.pts).forEach((atleta, i) => {
-            document.getElementById('corpoTabela').innerHTML += `<tr><td>${i+1}</td><td>${atleta.nome}</td><td>${atleta.pts}</td><td>${atleta.v}</td></tr>`;
+            corpoTabela.innerHTML += `<tr><td>${i+1}</td><td>${atleta.nome}</td><td>${atleta.time}</td><td>${atleta.pts}</td></tr>`;
         });
     });
 </script>
