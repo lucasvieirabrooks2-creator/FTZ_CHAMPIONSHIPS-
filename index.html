@@ -3,150 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championship - Player Profile</title>
+    <title>FTz Championship - Hub Oficial</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; }
+        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; }
         
-        nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 10px; border-bottom: 1px solid var(--primary); sticky: top; }
-        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 11px; }
-        nav button.active { color: var(--primary); }
+        nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); overflow-x: auto; }
+        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+        nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
         .container { padding: 20px; max-width: 600px; margin: auto; }
-        .page { display: none; }
+        .page { display: none; animation: slideUp 0.4s ease-out; }
         .page.active { display: block; }
+        
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #1e293b; margin-bottom: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; }
+        h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; margin-bottom: 15px; }
         
-        /* Estilo do Card do Jogador */
-        .player-card { background: linear-gradient(135deg, #111827 0%, #000 100%); border: 2px solid var(--primary); border-radius: 20px; padding: 20px; text-align: center; position: relative; overflow: hidden; }
-        .player-photo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; margin-bottom: 10px; }
-        .team-shield { width: 40px; height: 40px; position: absolute; top: 20px; right: 20px; border-radius: 5px; }
-        .player-name { font-size: 24px; font-weight: bold; color: var(--primary); margin: 5px 0; }
-        .team-name { color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
+        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
+        .btn-danger { background: var(--danger); color: white; padding: 8px; border: none; border-radius: 5px; cursor: pointer; }
         
-        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-align: center; display: block; text-decoration: none; }
-        .label-file { display: block; font-size: 12px; color: var(--primary); margin-top: 10px; }
+        /* Estilo Card Jogador */
+        .player-card { background: linear-gradient(135deg, #111827 0%, #000 100%); border: 2px solid var(--primary); border-radius: 20px; padding: 20px; text-align: center; position: relative; margin-bottom: 20px; }
+        .player-photo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; }
+        .team-shield { width: 40px; height: 40px; position: absolute; top: 15px; right: 15px; border-radius: 5px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: var(--primary); font-size: 11px; padding: 8px; border-bottom: 1px solid #334155; }
+        td { padding: 10px 8px; border-bottom: 1px solid #1e293b; font-size: 13px; }
+
+        .comp-item { border-left: 4px solid var(--primary); padding: 15px; background: #1a2236; border-radius: 8px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <nav>
     <button onclick="showPage('home')" id="btn-home" class="active">Início</button>
-    <button onclick="showPage('cadastro')" id="btn-cadastro">Criar Perfil</button>
-    <button onclick="showPage('atletas')" id="btn-atletas">Atletas</button>
+    <button onclick="showPage('cadastro')" id="btn-cadastro">Meu Perfil</button>
+    <button onclick="showPage('competicoes')" id="btn-competicoes">Eventos</button>
+    <button onclick="showPage('tabela')" id="btn-tabela">Ranking/Liga</button>
+    <button onclick="showPage('admin')" id="btn-admin">ADM</button>
 </nav>
 
 <div class="container">
     <div id="home" class="page active">
-        <h1>FTz R6 MOBILE</h1>
+        <h1>FTz Championships</h1>
         <div class="card" style="text-align: center;">
-            <p>Crie seu perfil oficial e entre para o ranking.</p>
-            <button class="btn" onclick="showPage('cadastro')">COMEÇAR CADASTRO</button>
+            <p>A plataforma definitiva para o cenário competitivo de R6 Mobile.</p>
+            <button class="btn" onclick="showPage('cadastro')">CRIAR MEU PERFIL</button>
         </div>
     </div>
 
     <div id="cadastro" class="page">
-        <h2>Seu Perfil de Atleta</h2>
+        <h2>Perfil de Atleta</h2>
         <div class="card">
             <input id="pNome" placeholder="Seu Nickname">
             <input id="pTime" placeholder="Nome da sua Equipe">
             <input id="pUbi" placeholder="ID do Tracker.gg (Ex: 5310a588...)">
-            
-            <label class="label-file">Sua Foto de Jogador:</label>
-            <input type="file" id="fotoFile" accept="image/*">
-            
-            <label class="label-file">Escudo da Equipe:</label>
-            <input type="file" id="shieldFile" accept="image/*">
-            
-            <button class="btn" onclick="uploadData()">SALVAR PERFIL</button>
+            <input id="pFotoURL" placeholder="Link da sua Foto (URL)">
+            <input id="pEscudoURL" placeholder="Link do Escudo da Equipe (URL)">
+            <p style="font-size: 10px; color: #888; margin: 0;">* Use links de imagens do Imgur, Discord ou similares.</p>
+            <button class="btn" onclick="salvarPerfil()">SALVAR E ATIVAR PERFIL</button>
         </div>
     </div>
 
-    <div id="atletas" class="page">
-        <h2>Jogadores Registrados</h2>
-        <div id="listaAtletas"></div>
+    <div id="competicoes" class="page">
+        <h2>Torneios e Ligas</h2>
+        <div id="listaCompeticoes"></div>
+    </div>
+
+    <div id="tabela" class="page">
+        <h2>Classificação Geral</h2>
+        <div id="listaAtletas"></div> <div class="card">
+            <h3>Tabela de Pontos</h3>
+            <table>
+                <thead><tr><th>#</th><th>Atleta</th><th>PTS</th><th>V</th></tr></thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="admin" class="page">
+        <h1>Painel Admin</h1>
+        <div class="card">
+            <input type="password" id="adminSenha" placeholder="Senha Administrativa">
+            <div class="card" style="border-color: var(--primary);">
+                <h3>Novo Evento</h3>
+                <input id="compNome" placeholder="Nome">
+                <select id="compTipo">
+                    <option value="campeonato">Campeonato (Mata-mata)</option>
+                    <option value="liga">Liga (Pontos Corridos)</option>
+                </select>
+                <button class="btn" onclick="criarEvento()">PUBLICAR</button>
+            </div>
+            <h3>Gerenciar Eventos</h3>
+            <div id="adminListaEventos"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Seus dados do Firebase (usando os das suas imagens anteriores)
     const firebaseConfig = {
         apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
         authDomain: "ftzchampionships.firebaseapp.com",
         databaseURL: "https://ftzchampionships-default-rtdb.firebaseio.com",
         projectId: "ftzchampionships",
-        storageBucket: "ftzchampionships.appspot.com",
+        storageBucket: "ftzchampionships.firebasestorage.app",
         messagingSenderId: "241465233774",
         appId: "1:241465233774:web:877740ce39f06443acf17f"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const storage = firebase.storage();
 
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        document.getElementById('btn-'+pageId).classList.add('active');
+        if(document.getElementById('btn-'+pageId)) document.getElementById('btn-'+pageId).classList.add('active');
     }
 
-    async function uploadData() {
-        const nome = document.getElementById('pNome').value;
-        const time = document.getElementById('pTime').value;
-        const ubi = document.getElementById('pUbi').value;
-        const foto = document.getElementById('fotoFile').files[0];
-        const escudo = document.getElementById('shieldFile').files[0];
-
-        if(!nome || !foto) return alert("Nome e Foto são obrigatórios!");
-
-        alert("Enviando dados... aguarde.");
-
-        // Upload da Foto
-        const fotoRef = storage.ref('jogadores/' + nome + '_foto');
-        await fotoRef.put(foto);
-        const fotoURL = await fotoRef.getDownloadURL();
-
-        // Upload do Escudo (se houver)
-        let escudoURL = "";
-        if(escudo) {
-            const escRef = storage.ref('equipes/' + time + '_escudo');
-            await escRef.put(escudo);
-            escudoURL = await escRef.getDownloadURL();
-        }
-
-        db.ref('inscricoes/').push({
-            nome, time, ubiID: ubi, fotoURL, escudoURL, status: "aprovado", wins: 0, mvps: 0
-        }).then(() => {
+    // Função para salvar perfil sem Storage
+    function salvarPerfil() {
+        const dados = {
+            nome: document.getElementById('pNome').value,
+            time: document.getElementById('pTime').value,
+            ubiID: document.getElementById('pUbi').value,
+            fotoURL: document.getElementById('pFotoURL').value,
+            escudoURL: document.getElementById('pEscudoURL').value,
+            status: "aprovado",
+            wins: 0
+        };
+        if(!dados.nome || !dados.fotoURL) return alert("Nick e Link da Foto são obrigatórios!");
+        
+        db.ref('inscricoes/').push(dados).then(() => {
             alert("Perfil Criado!");
-            showPage('atletas');
+            showPage('tabela');
         });
     }
 
-    db.ref('inscricoes/').on('value', (snapshot) => {
-        const data = snapshot.val();
-        const lista = document.getElementById('listaAtletas');
-        lista.innerHTML = "";
-        
-        for(let id in data) {
-            const p = data[id];
+    // Funções de Admin
+    function criarEvento() {
+        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha?");
+        const nome = document.getElementById('compNome').value;
+        const tipo = document.getElementById('compTipo').value;
+        if(nome) db.ref('eventos/').push({ nome, tipo });
+    }
+
+    function excluirEvento(id) {
+        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha?");
+        if(confirm("Excluir este evento?")) db.ref('eventos/'+id).remove();
+    }
+
+    // Sincronização em Tempo Real
+    db.ref().on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const eventos = data.eventos || {};
+        const atletas = data.inscricoes || {};
+
+        // Atualizar Listas
+        const listaComp = document.getElementById('listaCompeticoes');
+        const adminEventos = document.getElementById('adminListaEventos');
+        const listaCards = document.getElementById('listaAtletas');
+        const corpoTabela = document.getElementById('corpoTabela');
+
+        listaComp.innerHTML = ""; adminEventos.innerHTML = ""; listaCards.innerHTML = ""; corpoTabela.innerHTML = "";
+
+        // Renderizar Eventos
+        for(let id in eventos) {
+            const e = eventos[id];
+            listaComp.innerHTML += `<div class="comp-item"><h3>${e.nome} (${e.tipo})</h3><button class="btn" onclick="alert('Inscrito!')">Participar</button></div>`;
+            adminEventos.innerHTML += `<div class="card" style="display:flex; justify-content:space-between;"><span>${e.nome}</span><button class="btn-danger" onclick="excluirEvento('${id}')">X</button></div>`;
+        }
+
+        // Renderizar Cards de Jogadores e Tabela
+        const ranking = [];
+        for(let id in atletas) {
+            const p = atletas[id];
             const trackerUrl = `https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview`;
             
-            lista.innerHTML += `
-                <div class="player-card" style="margin-bottom:20px;">
-                    ${p.escudoURL ? `<img src="${p.escudoURL}" class="team-shield">` : ''}
+            listaCards.innerHTML += `
+                <div class="player-card">
+                    <img src="${p.escudoURL}" class="team-shield">
                     <img src="${p.fotoURL}" class="player-photo">
-                    <div class="player-name">${p.nome}</div>
-                    <div class="team-name">${p.time || 'Sem Equipe'}</div>
-                    <div style="margin-top:10px; font-size:12px;">Wins: ${p.wins} | MVPs: ${p.mvps}</div>
-                    <a href="${trackerUrl}" target="_blank" class="btn" style="margin-top:15px; font-size:12px;">TRACKER.GG STATS</a>
+                    <div style="font-size:20px; font-weight:bold; color:var(--primary);">${p.nome}</div>
+                    <div style="color:#888; font-size:12px;">${p.time}</div>
+                    <a href="${trackerUrl}" target="_blank" class="btn" style="padding:5px; font-size:10px;">VER STATS R6M</a>
                 </div>`;
+            
+            ranking.push({ nome: p.nome, wins: p.wins || 0, pts: (p.wins || 0) * 3 });
         }
+
+        ranking.sort((a,b) => b.pts - a.pts).forEach((atleta, i) => {
+            corpoTabela.innerHTML += `<tr><td>${i+1}</td><td>${atleta.nome}</td><td>${atleta.pts}</td><td>${atleta.wins}</td></tr>`;
+        });
     });
 </script>
 </body>
