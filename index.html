@@ -7,11 +7,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; }
+        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; }
         
-        nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 15px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); }
-        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); }
+        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
         nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
         .container { padding: 20px; max-width: 800px; margin: auto; }
@@ -21,47 +21,52 @@
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; }
-        h1 { color: var(--primary); text-align: center; }
+        h1 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
         
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
         .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
         
         .atleta-list-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; cursor: pointer; }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); margin-right: 15px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--primary); margin-right: 15px; display: flex; align-items: center; justify-content: center; background: #000; color: var(--primary); font-weight: bold; }
 
-        .perfil-header { text-align: center; padding: 20px; background: linear-gradient(180deg, #1e293b 0%, var(--bg) 100%); border-radius: 15px; margin-bottom: 20px; }
-        .label-mobile { color: #ffd700; font-size: 0.8em; font-weight: bold; margin-top: 5px; display: block; }
+        .perfil-header { text-align: center; padding: 20px; background: linear-gradient(180deg, #1e293b 0%, var(--bg) 100%); border-radius: 15px; margin-bottom: 20px; border: 1px solid #1e293b; }
+        .stats-row { display: flex; justify-content: space-around; margin: 20px 0; gap: 10px; }
+        .stat-box { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid var(--primary); flex: 1; text-align: center; }
+        
+        .admin-edit-card { border-left: 4px solid var(--warning); padding: 15px; background: #1a2236; margin-bottom: 10px; border-radius: 8px; }
+        .small-btn { padding: 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
 
 <nav>
-    <button onclick="showPage('home')" id="btn-home" class="active">Home</button>
+    <button onclick="showPage('home')" id="btn-home" class="active">Início</button>
     <button onclick="showPage('inscricao')" id="btn-inscricao">Inscrição</button>
     <button onclick="showPage('atletas')" id="btn-atletas">Atletas</button>
-    <button onclick="showPage('admin')" id="btn-admin">Admin</button>
+    <button onclick="showPage('admin')" id="btn-admin">Dono (ADM)</button>
 </nav>
 
 <div class="container">
     <div id="home" class="page active">
         <h1>FTz R6 MOBILE</h1>
         <div class="card" style="text-align: center;">
-            <p>Integração oficial com Tracker.gg para Rainbow Six Mobile.</p>
-            <button class="btn" onclick="showPage('inscricao')">CADASTRAR MEU PERFIL</button>
+            <p>Bem-vindo à central de inteligência da FTz Gaming.</p>
+            <button class="btn" onclick="showPage('inscricao')">INSCREVER-ME AGORA</button>
         </div>
     </div>
 
     <div id="inscricao" class="page">
-        <h1>CADASTRO</h1>
+        <h1>CADASTRO R6M</h1>
         <div class="card">
-            <input id="atletaNome" placeholder="Nickname da FTz">
-            <input id="ubiID" placeholder="ID exato no Tracker.gg (Ex: Nickname#1234)">
-            <button class="btn" onclick="inscrever()">ENVIAR PARA ANÁLISE</button>
+            <p style="font-size: 12px; color: var(--primary);">* Use o ID que aparece no link do Tracker.gg</p>
+            <input id="atletaNome" placeholder="Nickname do Jogador">
+            <input id="ubiID" placeholder="ID do Tracker (Ex: 5310a588-...)">
+            <button class="btn" onclick="inscrever()">ENVIAR SOLICITAÇÃO</button>
         </div>
     </div>
 
     <div id="atletas" class="page">
-        <h1>LINE-UP</h1>
+        <h1>LINE-UP OFICIAL</h1>
         <div id="listaAtletas" class="card" style="padding: 0;"></div>
     </div>
 
@@ -71,10 +76,17 @@
     </div>
 
     <div id="admin" class="page">
-        <h1>PAINEL ADM</h1>
+        <h1>PAINEL DE GESTÃO</h1>
         <div class="card">
-            <input type="password" id="adminSenha" placeholder="Senha Admin">
-            <div id="pendentes"></div>
+            <input type="password" id="adminSenha" placeholder="Senha Administrativa">
+            <div id="pendentesSection">
+                <h3 style="color: var(--warning)">🔔 Pendentes</h3>
+                <div id="pendentes"></div>
+            </div>
+            <div id="gerenciarSection" style="margin-top: 30px;">
+                <h3 style="color: var(--primary)">⚙️ Gerir Atletas</h3>
+                <div id="listaGerenciar"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -104,9 +116,9 @@
     function inscrever() {
         const nome = document.getElementById('atletaNome').value;
         const ubi = document.getElementById('ubiID').value;
-        if(!nome || !ubi) return alert("Preencha os campos!");
-        db.ref('inscricoes/').push({ nome, ubiID: ubi, status: "pendente" }).then(() => {
-            alert("Enviado!");
+        if(!nome || !ubi) return alert("Campos vazios!");
+        db.ref('inscricoes/').push({ nome, ubiID: ubi, status: "pendente", wins: 0, mvps: 0 }).then(() => {
+            alert("Enviado com sucesso!");
             showPage('home');
         });
     }
@@ -114,13 +126,18 @@
     function abrirPerfil(id) {
         db.ref('inscricoes/' + id).once('value', (snapshot) => {
             const p = snapshot.val();
-            const trackerUrl = `https://tracker.gg/r6mobile/profile/ubi/${encodeURIComponent(p.ubiID)}/overview`;
+            // LINK ATUALIZADO PARA O FORMATO 'IGN' DO TRACKER.GG
+            const trackerUrl = `https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview`;
             document.getElementById('conteudoPerfil').innerHTML = `
                 <div class="perfil-header">
-                    <h2>${p.nome}</h2>
-                    <span class="label-mobile">ID MOBILE: ${p.ubiID}</span>
+                    <h2 style="color: var(--primary)">${p.nome}</h2>
+                    <span style="font-size: 10px; color: #aaa;">UID: ${p.ubiID}</span>
                 </div>
-                <a href="${trackerUrl}" target="_blank" class="btn">ABRIR TRACKER.GG MOBILE</a>
+                <div class="stats-row">
+                    <div class="stat-box"><small>WINS</small><br><b style="font-size: 20px;">${p.wins || 0}</b></div>
+                    <div class="stat-box"><small>MVPs</small><br><b style="font-size: 20px;">${p.mvps || 0}</b></div>
+                </div>
+                <a href="${trackerUrl}" target="_blank" class="btn">ACEDER AO TRACKER.GG MOBILE</a>
             `;
             showPage('perfil');
         });
@@ -130,24 +147,47 @@
         const data = snapshot.val();
         const lista = document.getElementById('listaAtletas');
         const pendentes = document.getElementById('pendentes');
-        lista.innerHTML = ""; pendentes.innerHTML = "";
+        const listaGerenciar = document.getElementById('listaGerenciar');
+        lista.innerHTML = ""; pendentes.innerHTML = ""; listaGerenciar.innerHTML = "";
 
         for (let id in data) {
             const p = data[id];
             if(p.status === "aprovado") {
-                lista.innerHTML += `<div class="atleta-list-item" onclick="abrirPerfil('${id}')">
-                    <div class="avatar">R6M</div>
-                    <div style="flex:1"><strong>${p.nome}</strong><br><small>Ver Estatísticas Mobile</small></div>
-                    <span>→</span>
-                </div>`;
+                lista.innerHTML += `
+                    <div class="atleta-list-item" onclick="abrirPerfil('${id}')">
+                        <div class="avatar">FTz</div>
+                        <div style="flex:1"><strong>${p.nome}</strong><br><small>Stats Mobile Ativas</small></div>
+                        <span>→</span>
+                    </div>`;
+                
+                listaGerenciar.innerHTML += `
+                    <div class="admin-edit-card">
+                        <strong>${p.nome}</strong>
+                        <div style="margin-top:10px; display:flex; gap:5px;">
+                            <button class="small-btn" style="background:var(--success)" onclick="updateStat('${id}', 'wins', 1)">+1 Win</button>
+                            <button class="small-btn" style="background:var(--primary); color:#000" onclick="updateStat('${id}', 'mvps', 1)">+1 MVP</button>
+                            <button class="small-btn" style="background:var(--danger)" onclick="removerAtleta('${id}')">X</button>
+                        </div>
+                    </div>`;
             } else {
-                pendentes.innerHTML += `<div style="display:flex; justify-content:space-between; margin-top:10px;">
-                    <span>${p.nome}</span>
-                    <button onclick="decidir('${id}', 'aprovado')">✓</button>
-                </div>`;
+                pendentes.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:10px; margin-bottom:5px; border-radius:8px; border-left: 3px solid var(--warning);">
+                        <span>${p.nome}</span>
+                        <button class="small-btn" style="background:var(--success)" onclick="decidir('${id}', 'aprovado')">Aceitar</button>
+                    </div>`;
             }
         }
     });
+
+    function updateStat(id, stat, valor) {
+        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha incorreta!");
+        db.ref('inscricoes/' + id).child(stat).transaction(c => (c || 0) + valor);
+    }
+
+    function removerAtleta(id) {
+        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha!");
+        if(confirm("Excluir atleta?")) db.ref('inscricoes/' + id).remove();
+    }
 
     function decidir(id, acao) {
         if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha!");
