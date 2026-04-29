@@ -7,25 +7,38 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; }
+        :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; }
+        
         nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 10px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); overflow-x: auto; }
-        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+        nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; white-space: nowrap; transition: 0.3s; }
         nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
         .container { padding: 20px; max-width: 600px; margin: auto; }
-        .page { display: none; }
+        .page { display: none; animation: fadeIn 0.5s ease; }
         .page.active { display: block; }
-        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; }
-        h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; position: relative; overflow: hidden; }
+        h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
+        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; transition: 0.3s; }
+        .btn:hover { filter: brightness(1.2); transform: scale(1.02); }
         .btn-danger { background: var(--danger); color: white; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 10px; }
-        .player-card { background: linear-gradient(135deg, #111827 0%, #000 100%); border: 2px solid var(--primary); border-radius: 20px; padding: 20px; text-align: center; position: relative; margin-bottom: 20px; }
-        .player-photo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; }
-        .team-shield { width: 40px; height: 40px; position: absolute; top: 15px; right: 15px; border-radius: 5px; background: #000; }
+        
+        /* Estilo Card Jogador */
+        .player-card { background: linear-gradient(135deg, #111827 0%, #000 100%); border: 2px solid var(--primary); border-radius: 20px; padding: 25px; text-align: center; position: relative; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1); }
+        .player-photo { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; margin-bottom: 10px; }
+        .team-shield { width: 45px; height: 45px; position: absolute; top: 15px; right: 15px; border-radius: 8px; background: #000; padding: 2px; border: 1px solid #333; }
+        
+        .badge { background: var(--primary); color: #000; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: var(--primary); font-size: 11px; padding: 8px; border-bottom: 1px solid #334155; }
-        td { padding: 10px 8px; border-bottom: 1px solid #1e293b; font-size: 13px; }
+        th { text-align: left; color: var(--primary); font-size: 11px; padding: 10px; border-bottom: 2px solid #1e293b; }
+        td { padding: 12px 10px; border-bottom: 1px solid #1e293b; font-size: 14px; }
+
+        .news-card { border-left: 4px solid var(--primary); background: #1a2236; padding: 15px; border-radius: 0 10px 10px 0; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -34,70 +47,72 @@
     <button onclick="showPage('home')" id="btn-home" class="active">Início</button>
     <button onclick="showPage('cadastro')" id="btn-cadastro">Meu Perfil</button>
     <button onclick="showPage('competicoes')" id="btn-competicoes">Eventos</button>
-    <button onclick="showPage('tabela')" id="btn-tabela">Ranking/Liga</button>
+    <button onclick="showPage('tabela')" id="btn-tabela">Ranking</button>
     <button onclick="showPage('admin')" id="btn-admin">ADM</button>
 </nav>
 
 <div class="container">
     <div id="home" class="page active">
         <h1>FTz Championships</h1>
-        <div class="card" style="text-align: center;">
-            <p>Plataforma de gestão e competições R6 Mobile.</p>
-            <button class="btn" onclick="showPage('cadastro')">CRIAR MEU PERFIL</button>
+        <div id="listaNews"></div>
+        <div class="card" style="text-align: center; border-style: dashed; border-color: #334155;">
+            <p style="color: #888;">Nenhuma notícia importante no momento.</p>
         </div>
     </div>
 
     <div id="cadastro" class="page">
-        <h2>Cadastro de Atleta</h2>
+        <h2>Criar Perfil Atleta</h2>
         <div class="card">
-            <input id="pNome" placeholder="Seu Nickname (Obrigatório)">
-            <input id="pTime" placeholder="Nome da Equipe">
-            <input id="pUbi" placeholder="ID do Tracker.gg (Obrigatório para Stats)">
-            <input id="pFotoURL" placeholder="Link da sua Foto (Opcional)">
-            <input id="pEscudoURL" placeholder="Link do Escudo (Opcional)">
-            <button class="btn" onclick="salvarPerfil()">SOLICITAR APROVAÇÃO</button>
+            <input id="pNome" placeholder="Nickname Oficial">
+            <input id="pTime" placeholder="Nome da Line/Equipe">
+            <input id="pUbi" placeholder="ID Tracker.gg (Apenas o código final)">
+            <input id="pFotoURL" placeholder="Link da Foto (Opcional)">
+            <input id="pEscudoURL" placeholder="Link do Escudo Time (Opcional)">
+            <button class="btn" onclick="salvarPerfil()">SOLICITAR REGISTRO</button>
         </div>
     </div>
 
     <div id="competicoes" class="page">
-        <h2>Torneios Ativos</h2>
+        <h2>Torneios & Ligas</h2>
         <div id="listaCompeticoes"></div>
     </div>
 
     <div id="tabela" class="page">
-        <h2>Ranking e Atletas</h2>
+        <h2>Classificação de Elite</h2>
         <div id="listaAtletas"></div>
         <div class="card">
-            <h3>Classificação</h3>
+            <h3>Tabela de Pontos (LDB)</h3>
             <table>
-                <thead><tr><th>#</th><th>Atleta</th><th>PTS</th><th>V</th></tr></thead>
+                <thead><tr><th>#</th><th>Atleta</th><th>PTS</th><th>VIT</th></tr></thead>
                 <tbody id="corpoTabela"></tbody>
             </table>
         </div>
     </div>
 
     <div id="admin" class="page">
-        <h1>PAINEL ADMIN</h1>
+        <h1>Painel de Controle</h1>
         <div class="card">
-            <input type="password" id="adminSenha" placeholder="Senha Administrativa">
+            <input type="password" id="adminSenha" placeholder="Chave Administrativa">
             
-            <div class="card" style="border-color: var(--primary); margin-top: 15px;">
-                <h3>NOVO EVENTO</h3>
-                <input id="compNome" placeholder="Nome do Evento">
-                <select id="compTipo">
-                    <option value="campeonato">Campeonato (Mata-mata)</option>
-                    <option value="liga">Liga (Pontos Corridos)</option>
-                </select>
-                <button class="btn" onclick="criarEvento()">PUBLICAR</button>
+            <div class="card" style="border-color: var(--primary);">
+                <h3>Postar Notícia</h3>
+                <textarea id="newsTexto" placeholder="Escreva o aviso para os jogadores..."></textarea>
+                <button class="btn" onclick="postarNews()">POSTAR NO INÍCIO</button>
             </div>
 
-            <div class="card" style="margin-top: 15px;">
-                <h3>APROVAR ATLETAS</h3>
-                <div id="listaAprovacao"></div>
+            <div class="card">
+                <h3>Novo Evento</h3>
+                <input id="compNome" placeholder="Nome do Campeonato">
+                <button class="btn" onclick="criarEvento()">PUBLICAR EVENTO</button>
             </div>
 
-            <div class="card" style="margin-top: 15px;">
-                <h3>GERENCIAR EVENTOS</h3>
+            <div class="card">
+                <h3>Aprovar Atletas & Gerenciar Pontos</h3>
+                <div id="listaAdminAtletas"></div>
+            </div>
+
+            <div class="card">
+                <h3>Remover Eventos</h3>
                 <div id="adminListaEventos"></div>
             </div>
         </div>
@@ -118,7 +133,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Imagens padrão caso o link seja deixado vazio
     const FOTO_PADRAO = "https://www.pngitem.com/pimgs/m/150-1503945_transparent-user-png-default-user-image-png-png.png";
     const ESCUDO_PADRAO = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_x1u7f3l_J8z3nE6uY4z2K_v1V_Gf0E4AFA&s";
 
@@ -126,92 +140,90 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        if(document.getElementById('btn-'+pageId)) document.getElementById('btn-'+pageId).classList.add('active');
+        document.getElementById('btn-'+pageId).classList.add('active');
     }
 
     function salvarPerfil() {
         const nome = document.getElementById('pNome').value;
         const ubi = document.getElementById('pUbi').value;
-        
-        if(!nome || !ubi) return alert("Nick e ID Tracker são obrigatórios para integração de stats!");
+        if(!nome || !ubi) return alert("Nickname e ID Tracker são obrigatórios!");
 
-        const dados = {
-            nome: nome,
-            time: document.getElementById('pTime').value || "Sem Equipe",
-            ubiID: ubi,
+        db.ref('inscricoes/').push({
+            nome, ubiID: ubi,
+            time: document.getElementById('pTime').value || "FREE AGENT",
             fotoURL: document.getElementById('pFotoURL').value || FOTO_PADRAO,
             escudoURL: document.getElementById('pEscudoURL').value || ESCUDO_PADRAO,
-            status: "pendente",
-            wins: 0
-        };
+            status: "pendente", wins: 0
+        }).then(() => { alert("Perfil enviado para análise!"); showPage('home'); });
+    }
 
-        db.ref('inscricoes/').push(dados).then(() => {
-            alert("Solicitação enviada! Aguarde a aprovação do ADM.");
-            document.querySelectorAll('input').forEach(i => i.value = "");
-        });
+    // FUNÇÕES ADM
+    function postarNews() {
+        const txt = document.getElementById('newsTexto').value;
+        if(txt) db.ref('news/').push({ texto: txt, data: new Date().toLocaleDateString() });
     }
 
     function criarEvento() {
-        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha incorreta!");
         const nome = document.getElementById('compNome').value;
-        const tipo = document.getElementById('compTipo').value;
-        if(nome) db.ref('eventos/').push({ nome, tipo });
+        if(nome) db.ref('eventos/').push({ nome });
     }
 
-    function aprovarAtleta(id) {
-        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha para aprovar?");
-        db.ref('inscricoes/' + id).update({ status: "aprovado" }).then(() => alert("Atleta aprovado!"));
-    }
+    function aprovar(id) { db.ref('inscricoes/'+id).update({ status: "aprovado" }); }
+    function addWin(id, atual) { db.ref('inscricoes/'+id).update({ wins: (atual || 0) + 1 }); }
+    function excluirEv(id) { db.ref('eventos/'+id).remove(); }
 
-    function excluirEvento(id) {
-        if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha?");
-        db.ref('eventos/'+id).remove();
-    }
-
+    // RENDERIZAÇÃO REALTIME
     db.ref().on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const atletas = data.inscricoes || {};
         const eventos = data.eventos || {};
+        const news = data.news || {};
 
-        const listaAprov = document.getElementById('listaAprovacao');
-        const listaCards = document.getElementById('listaAtletas');
-        const corpoTab = document.getElementById('corpoTabela');
-        const listaEv = document.getElementById('listaCompeticoes');
-        const adminEv = document.getElementById('adminListaEventos');
+        // Limpar tudo
+        document.getElementById('listaNews').innerHTML = "";
+        document.getElementById('listaAtletas').innerHTML = "";
+        document.getElementById('corpoTabela').innerHTML = "";
+        document.getElementById('listaCompeticoes').innerHTML = "";
+        document.getElementById('listaAdminAtletas').innerHTML = "";
+        document.getElementById('adminListaEventos').innerHTML = "";
 
-        listaAprov.innerHTML = ""; listaCards.innerHTML = ""; corpoTab.innerHTML = ""; listaEv.innerHTML = ""; adminEv.innerHTML = "";
+        // News
+        for(let id in news) {
+            document.getElementById('listaNews').innerHTML = `<div class="news-card"><small>${news[id].data}</small><p>${news[id].texto}</p></div>` + document.getElementById('listaNews').innerHTML;
+        }
 
+        // Eventos
         for(let id in eventos) {
-            const e = eventos[id];
-            listaEv.innerHTML += `<div class="card"><h3>${e.nome}</h3><p>Tipo: ${e.tipo}</p></div>`;
-            adminEv.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span>${e.nome}</span><button class="btn-danger" onclick="excluirEvento('${id}')">EXCLUIR</button></div>`;
+            document.getElementById('listaCompeticoes').innerHTML += `<div class="card"><h3>${eventos[id].nome}</h3><button class="btn">INSCREVER LINE</button></div>`;
+            document.getElementById('adminListaEventos').innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${eventos[id].nome}</span><button class="btn-danger" onclick="excluirEv('${id}')">X</button></div>`;
         }
 
         const ranking = [];
         for(let id in atletas) {
             const p = atletas[id];
             if(p.status === "pendente") {
-                listaAprov.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#1a2236; padding:10px; border-radius:5px; margin-bottom:5px;">
-                        <span>${p.nome}</span>
-                        <button class="btn" style="width:70px; margin:0; font-size:10px;" onclick="aprovarAtleta('${id}')">APROVAR</button>
-                    </div>`;
+                document.getElementById('listaAdminAtletas').innerHTML += `<div class="card" style="background:#1a2236;">${p.nome} <button class="btn" onclick="aprovar('${id}')">APROVAR JOGADOR</button></div>`;
             } else {
-                const tracker = `https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview`;
-                listaCards.innerHTML += `
+                // Cards de Jogadores
+                document.getElementById('listaAtletas').innerHTML += `
                     <div class="player-card">
+                        <span class="badge">MEMBRO FTZ</span>
                         <img src="${p.escudoURL}" class="team-shield">
                         <img src="${p.fotoURL}" class="player-photo">
-                        <div style="font-size:22px; font-weight:bold; color:var(--primary);">${p.nome}</div>
-                        <div style="color:#aaa; font-size:12px;">${p.time}</div>
-                        <a href="${tracker}" target="_blank" class="btn" style="font-size:10px; margin-top:15px;">UBI TRACKER STATS</a>
+                        <div style="font-size:24px; font-weight:bold; color:var(--primary);">${p.nome}</div>
+                        <div style="color:#888; margin-bottom:10px;">${p.time}</div>
+                        <a href="https://tracker.gg/r6mobile/profile/ign/${p.ubiID}/overview" target="_blank" class="btn" style="padding:8px; font-size:12px;">ESTATÍSTICAS UBISOFT</a>
                     </div>`;
+                
+                // Admin Adicionar Vitórias
+                document.getElementById('listaAdminAtletas').innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333;"><span>${p.nome} (${p.wins || 0}V)</span><button class="btn" style="width:100px; margin:0; font-size:10px;" onclick="addWin('${id}', ${p.wins})">+1 VITÓRIA</button></div>`;
+                
                 ranking.push({ nome: p.nome, pts: (p.wins || 0) * 3, v: p.wins || 0 });
             }
         }
 
         ranking.sort((a,b) => b.pts - a.pts).forEach((atleta, i) => {
-            corpoTab.innerHTML += `<tr><td>${i+1}</td><td>${atleta.nome}</td><td>${atleta.pts}</td><td>${atleta.v}</td></tr>`;
+            document.getElementById('corpoTabela').innerHTML += `<tr><td>${i+1}</td><td>${atleta.nome}</td><td>${atleta.pts}</td><td>${atleta.v}</td></tr>`;
         });
     });
 </script>
