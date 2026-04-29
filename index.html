@@ -3,89 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championships | Tournament Manager</title>
+    <title>FTz Professional eSports Platform</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #05070a; --card: #0d1117; --accent: #7000ff; }
-        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; }
+        :root { --primary: #00f0ff; --bg: #030508; --card: #0d1117; --accent: #7000ff; --win: #00ff88; --loss: #ff0055; }
+        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #e6edf3; overflow-x: hidden; }
         
-        /* Nav Estilo Arena */
-        nav { background: #000; padding: 15px; display: flex; justify-content: space-around; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 1000; }
-        nav button { background: none; border: none; color: #555; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
-        nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        /* Menu Lateral Estilo Gamer */
+        nav { background: #000; padding: 10px; display: flex; justify-content: space-around; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        nav button { background: none; border: none; color: #555; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
+        nav button.active { color: var(--primary); text-shadow: 0 0 15px var(--primary); }
 
-        .container { padding: 20px; max-width: 800px; margin: auto; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .container { padding: 20px; max-width: 900px; margin: auto; }
+        .page { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Tournament Cards */
-        .event-card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; overflow: hidden; margin-bottom: 20px; transition: 0.3s; }
-        .event-card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .event-banner { width: 100%; height: 150px; background: linear-gradient(45deg, #111, #222); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; }
-        .event-info { padding: 15px; }
-        .status-badge { background: #00ff88; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        /* Widgets de Sistema */
+        .grid-system { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); border: 1px solid #30363d; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-card span { display: block; font-size: 10px; color: #8b949e; text-transform: uppercase; }
+        .stat-card b { font-size: 20px; color: var(--primary); }
 
-        /* Forms */
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; font-family: inherit; }
-        .btn-action { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        /* Cards de Time/Jogador */
+        .profile-card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; transition: 0.2s; }
+        .profile-card:hover { border-color: var(--accent); background: #161b22; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .verified-icon { color: var(--primary); font-size: 14px; margin-left: 5px; }
 
-        h2 { border-left: 4px solid var(--primary); padding-left: 10px; font-size: 18px; text-transform: uppercase; }
+        /* Tournament Manager */
+        .tourney-item { border-left: 4px solid var(--primary); background: #0d1117; padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; }
+        .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .open { background: var(--win); color: #000; }
+        .closed { background: #333; color: #fff; }
+
+        /* Form Estilizado */
+        .system-input { background: #000; border: 1px solid #30363d; color: #fff; padding: 12px; width: 100%; border-radius: 6px; margin: 8px 0; box-sizing: border-box; font-family: inherit; }
+        .btn-system { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-system:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); }
+
+        h2 { font-size: 22px; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <nav>
-    <button onclick="showPage('eventos')" id="btn-eventos" class="active">Campeonatos</button>
-    <button onclick="showPage('ranking')" id="btn-ranking">Ranking</button>
-    <button onclick="showPage('news')" id="btn-news">Feed</button>
-    <button onclick="showPage('adm')" id="btn-adm">Painel ADM</button>
+    <button onclick="showPage('dash')" id="btn-dash" class="active">Painel</button>
+    <button onclick="showPage('tourneys')" id="btn-tourneys">Campeonatos</button>
+    <button onclick="showPage('teams')" id="btn-teams">Times</button>
+    <button onclick="showPage('players')" id="btn-players">Jogadores</button>
+    <button onclick="showPage('admin')" id="btn-admin">Sistema</button>
 </nav>
 
 <div class="container">
     
-    <div id="eventos" class="page active">
-        <h2>Torneios Ativos</h2>
-        <div id="listaEventos">
-            </div>
-    </div>
-
-    <div id="ranking" class="page">
-        <h2>Hall de Elite</h2>
-        <div id="listaRanking"></div>
-    </div>
-
-    <div id="news" class="page">
-        <h2>Notícias da Liga</h2>
-        <div id="feedIA"></div>
-    </div>
-
-    <div id="adm" class="page">
-        <h2>Gerenciador de Torneios</h2>
-        <div class="card" style="background: #0d1117; padding: 20px; border-radius: 12px;">
-            <p style="color: var(--primary); font-size: 12px;">CRIE UM NOVO CAMPEONATO ABAIXO</p>
-            <input id="evNome" placeholder="Nome do Campeonato (Ex: Copa FTz)">
-            <select id="evTipo">
-                <option value="Mata-mata">Mata-mata (Eliminação)</option>
-                <option value="Pontos Corridos">Pontos Corridos (Liga)</option>
-            </select>
-            <input id="evPremio" placeholder="Premiação (Ex: R$ 500,00 + Troféu)">
-            <input id="evData" type="date">
-            <button class="btn-action" onclick="criarCampeonato()">PUBLICAR CAMPEONATO</button>
+    <div id="dash" class="page active">
+        <div class="grid-system">
+            <div class="stat-card"><span>Torneios</span><b id="cTourney">0</b></div>
+            <div class="stat-card"><span>Times</span><b id="cTeams">0</b></div>
+            <div class="stat-card"><span>Atletas</span><b id="cPlayers">0</b></div>
+            <div class="stat-card"><span>Premiação Total</span><b>R$ 2.5k</b></div>
         </div>
+        <h2>Últimas Notificações</h2>
+        <div id="newsLog"></div>
+    </div>
+
+    <div id="tourneys" class="page">
+        <h2>Torneios Ativos</h2>
+        <div id="tourneyList"></div>
+    </div>
+
+    <div id="teams" class="page">
+        <h2>Organizações Registradas</h2>
+        <div id="teamList"></div>
+    </div>
+
+    <div id="players" class="page">
+        <h2>Base de Atletas</h2>
+        <div id="playerList"></div>
+    </div>
+
+    <div id="admin" class="page">
+        <h2>Painel de Gestão Master</h2>
         
-        <hr style="border: 0.5px solid #222; margin: 30px 0;">
-        <h3>Postar Notícia com IA</h3>
-        <textarea id="aiTopic" placeholder="Tópico rápido da notícia..."></textarea>
-        <button class="btn-action" style="background: var(--accent); color: white;" onclick="postarIA()">GERAR NOTÍCIA</button>
+        <div class="stat-card" style="text-align: left; margin-bottom: 20px;">
+            <h3>Criar Evento</h3>
+            <input id="sysTourneyName" class="system-input" placeholder="Nome do Torneio">
+            <select id="sysTourneyType" class="system-input">
+                <option value="Mata-mata">Modo: Mata-mata</option>
+                <option value="Liga">Modo: Liga (Pontos)</option>
+            </select>
+            <input id="sysTourneyPrize" class="system-input" placeholder="Premiação">
+            <button class="btn-system" onclick="sysCreateTourney()">PUBLICAR NO SISTEMA</button>
+        </div>
+
+        <div class="stat-card" style="text-align: left;">
+            <h3>Gerenciar Inscrições</h3>
+            <div id="sysPending"></div>
+        </div>
     </div>
 
 </div>
 
 <script>
-    // Configuração do seu Firebase (ftzchampionships)
     const firebaseConfig = {
         apiKey: "AIzaSyCfdwNv4sqmXKqb7Fm7EzNACMJ3aOMQ-Kw",
         authDomain: "ftzchampionships.firebaseapp.com",
@@ -105,65 +127,90 @@
         document.getElementById('btn-'+id).classList.add('active');
     }
 
-    // Criar Campeonato
-    function criarCampeonato() {
-        const nome = document.getElementById('evNome').value;
-        if(!nome) return alert("Nome do torneio é obrigatório!");
-
-        db.ref('eventos/').push({
-            nome: nome,
-            tipo: document.getElementById('evTipo').value,
-            premio: document.getElementById('evPremio').value,
-            data: document.getElementById('evData').value,
+    // LÓGICA DO SISTEMA
+    function sysCreateTourney() {
+        const name = document.getElementById('sysTourneyName').value;
+        if(!name) return alert("Erro: Nome vazio.");
+        db.ref('sistema/torneios').push({
+            nome: name,
+            tipo: document.getElementById('sysTourneyType').value,
+            premio: document.getElementById('sysTourneyPrize').value,
+            dataCriacao: new Date().toLocaleDateString(),
             status: "Inscrições Abertas"
         }).then(() => {
-            alert("Campeonato Criado!");
-            showPage('eventos');
+            alert("Sistema: Torneio publicado.");
+            document.getElementById('sysTourneyName').value = "";
         });
     }
 
-    // Notícia IA
-    function postarIA() {
-        const t = document.getElementById('aiTopic').value;
-        db.ref('noticiasIA/').push({
-            titulo: "UPDATE DA LIGA",
-            corpo: "O sistema processou novas informações: " + t,
-            data: new Date().toLocaleDateString()
-        });
-        alert("Notícia postada!");
-    }
+    function sysApprove(id) { db.ref('sistema/jogadores/'+id).update({ status: 'ativo' }); }
 
-    // Renderização Realtime
-    db.ref().on('value', snap => {
+    // RENDERIZAÇÃO REALTIME
+    db.ref('sistema').on('value', snap => {
         const d = snap.val() || {};
-        const eventos = d.eventos || {};
-        const noticias = d.noticiasIA || {};
+        const torneios = d.torneios || {};
+        const jogadores = d.jogadores || {};
+        
+        // Elementos
+        const tList = document.getElementById('tourneyList');
+        const pList = document.getElementById('playerList');
+        const teamList = document.getElementById('teamList');
+        const pending = document.getElementById('sysPending');
 
-        const listaEventos = document.getElementById('listaEventos');
-        listaEventos.innerHTML = "";
+        tList.innerHTML = ""; pList.innerHTML = ""; teamList.innerHTML = ""; pending.innerHTML = "";
+        
+        let countT = 0, countP = 0;
+        const orgs = {};
 
-        for(let id in eventos) {
-            const ev = eventos[id];
-            listaEventos.innerHTML += `
-                <div class="event-card">
-                    <div class="event-banner">BANNER DO EVENTO</div>
-                    <div class="event-info">
-                        <span class="status-badge">${ev.status}</span>
-                        <h3 style="margin: 10px 0;">${ev.nome}</h3>
-                        <p style="font-size: 12px; color: #888;">Tipo: ${ev.tipo} | Premiação: ${ev.premio}</p>
-                        <button class="btn-action" style="padding: 8px; font-size: 10px; margin-top: 10px;">INSCREVER MEU TIME</button>
-                    </div>
+        // Processar Torneios
+        for(let id in torneios) {
+            countT++;
+            const t = torneios[id];
+            tList.innerHTML += `
+                <div class="tourney-item">
+                    <span class="badge-status open">Ativo</span>
+                    <h3 style="margin: 10px 0;">${t.nome}</h3>
+                    <p style="font-size: 12px; color: #888;">Modo: ${t.tipo} | Prêmio: ${t.premio}</p>
+                    <button class="btn-system" style="padding: 10px; width: auto; font-size: 10px;">VER TABELA</button>
                 </div>`;
         }
 
-        const feed = document.getElementById('feedIA');
-        feed.innerHTML = "";
-        for(let id in noticias) {
-            feed.innerHTML = `<div class="card" style="padding:15px; margin-bottom:10px; border-left: 3px solid var(--accent); background:#0d1117;">
-                <b style="color:var(--accent)">${noticias[id].titulo}</b>
-                <p style="font-size:13px;">${noticias[id].corpo}</p>
-            </div>` + feed.innerHTML;
+        // Processar Jogadores e Times
+        for(let id in jogadores) {
+            const p = jogadores[id];
+            if(p.status === 'pendente') {
+                pending.innerHTML += `<div class="profile-card"><span>${p.nome}</span> <button onclick="sysApprove('${id}')">APROVAR</button></div>`;
+            } else {
+                countP++;
+                pList.innerHTML += `
+                    <div class="profile-card">
+                        <img src="${p.foto || 'https://i.imgur.com/89SByG1.png'}" class="avatar">
+                        <div>
+                            <b>${p.nome}</b> <span class="verified-icon">✔</span>
+                            <br><small>${p.time}</small>
+                        </div>
+                    </div>`;
+                
+                if(!orgs[p.time]) orgs[p.time] = { m: 0 };
+                orgs[p.time].m++;
+            }
         }
+
+        // Renderizar Times
+        for(let nome in orgs) {
+            teamList.innerHTML += `
+                <div class="profile-card">
+                    <div style="flex-grow: 1;">
+                        <b>${nome}</b>
+                        <br><small>${orgs[nome].m} Membros Ativos</small>
+                    </div>
+                    <button style="background: none; border: 1px solid var(--primary); color: var(--primary); font-size: 9px; padding: 5px;">PERFIL DA ORG</button>
+                </div>`;
+        }
+
+        document.getElementById('cTourney').innerText = countT;
+        document.getElementById('cPlayers').innerText = countP;
+        document.getElementById('cTeams').innerText = Object.keys(orgs).length;
     });
 </script>
 </body>
