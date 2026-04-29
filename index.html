@@ -3,25 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FTz Ultra App</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
+<title>FTz Ultra Master</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
 <style>
-body{margin:0;background:#0b0f14;color:#fff;font-family:sans-serif}
+body{
+margin:0;
+background:#0b0f14;
+color:#fff;
+font-family:Arial;
+}
+
 .container{padding:15px}
-.card{background:#111827;padding:15px;border-radius:12px;margin-bottom:15px}
-input,select,textarea{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff}
-button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold;border-radius:8px}
-.nav{display:flex;gap:5px;overflow:auto;margin-bottom:10px}
-.nav button{flex:1;background:#111}
+
+.card{
+background:#111827;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 0 10px rgba(0,0,0,0.5);
+}
+
+input,select,textarea{
+width:100%;
+padding:12px;
+margin:8px 0;
+background:#0f172a;
+border:1px solid #00eaff;
+color:#fff;
+border-radius:8px;
+font-size:16px;
+}
+
+input:focus,textarea:focus,select:focus{
+outline:none;
+box-shadow:0 0 10px #00eaff;
+}
+
+button{
+width:100%;
+padding:14px;
+background:#00eaff;
+border:none;
+border-radius:8px;
+font-weight:bold;
+color:#000;
+cursor:pointer;
+}
+
+.nav{
+display:flex;
+gap:5px;
+overflow:auto;
+margin-bottom:10px;
+}
+
+.nav button{
+background:#111;
+color:#fff;
+}
+
 .hidden{display:none}
-.item{padding:10px;border-bottom:1px solid #222}
+
+.item{
+padding:10px;
+border-bottom:1px solid #222;
+}
 </style>
 </head>
 
@@ -32,9 +82,9 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold;b
 <!-- LOGIN -->
 <div id="auth">
 <div class="card">
-<h3>Login</h3>
-<input id="email">
-<input id="senha" type="password">
+<h2>Login FTz</h2>
+<input id="email" placeholder="Email">
+<input id="senha" type="password" placeholder="Senha">
 <button onclick="App.Auth.login()">Entrar</button>
 </div>
 </div>
@@ -44,7 +94,6 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold;b
 
 <div class="nav">
 <button onclick="App.UI.go('teams')">Times</button>
-<button onclick="App.UI.go('tournaments')">Torneios</button>
 <button onclick="App.UI.go('matches')">Partidas</button>
 <button onclick="App.UI.go('ranking')">Ranking</button>
 <button onclick="App.UI.go('admin')" id="btnAdmin" class="hidden">Admin</button>
@@ -53,43 +102,61 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold;b
 <!-- TIMES -->
 <div id="teams" class="page">
 <div class="card">
-<input id="teamName" placeholder="Nome">
+<h3>Criar Time</h3>
+<input id="teamName" placeholder="Nome do time">
 <input id="tag" placeholder="TAG">
-<textarea id="players" placeholder="5 players"></textarea>
-<button onclick="App.Teams.create()">Criar</button>
+<textarea id="players" placeholder="Jogadores separados por vírgula"></textarea>
+<button onclick="App.Teams.create()">Criar Time</button>
 </div>
-<div class="card"><div id="teamList"></div></div>
+
+<div class="card">
+<h3>Seus Times</h3>
+<div id="teamList"></div>
+</div>
 </div>
 
 <!-- MATCHES -->
 <div id="matches" class="page hidden">
 <div class="card">
+<h3>Registrar Partida</h3>
+
 <select id="t1"></select>
 <select id="t2"></select>
+
 <select id="map">
 <option>Oregon</option>
 <option>Clubhouse</option>
 <option>Bank</option>
+<option>Consulate</option>
 </select>
-<input id="s1">
-<input id="s2">
-<input id="mvp">
+
+<input id="s1" placeholder="Score Time 1">
+<input id="s2" placeholder="Score Time 2">
+<input id="mvp" placeholder="MVP">
+
 <button onclick="App.Match.create()">Registrar</button>
 </div>
-<div class="card"><div id="history"></div></div>
+
+<div class="card">
+<h3>Histórico</h3>
+<div id="history"></div>
+</div>
 </div>
 
-<!-- RANK -->
+<!-- RANKING -->
 <div id="ranking" class="page hidden">
-<div class="card"><div id="rank"></div></div>
+<div class="card">
+<h3>Ranking</h3>
+<div id="rank"></div>
+</div>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" class="page hidden">
 <div class="card">
-<input id="tournamentName">
+<h3>Painel Admin</h3>
+<input id="tournamentName" placeholder="Nome do torneio">
 <button onclick="App.Tournament.create()">Criar Torneio</button>
-<button onclick="App.Tournament.bracket()">Gerar Chaveamento</button>
 </div>
 </div>
 
@@ -98,155 +165,163 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold;b
 
 <script>
 
-// ================= CORE =================
+/* ================= CONFIG ================= */
 const App = {
- state:{user:null,admin:false},
 
- init(){
- firebase.initializeApp({
- apiKey:"SUA_KEY",
- authDomain:"SEU_AUTH",
- databaseURL:"SEU_DB",
- projectId:"SEU_ID"
- });
+state:{user:null,admin:false},
 
- this.auth=firebase.auth();
- this.db=firebase.database();
+init(){
+firebase.initializeApp({
+apiKey:"SUA_API_KEY",
+authDomain:"SEU_AUTH",
+databaseURL:"SEU_DB",
+projectId:"SEU_ID"
+});
 
- this.bindAuth();
- this.loadData();
- },
+this.auth = firebase.auth();
+this.db = firebase.database();
 
- bindAuth(){
- this.auth.onAuthStateChanged(user=>{
- if(user){
- this.state.user=user;
- authDiv.style.display="none";
- app.classList.remove("hidden");
+this.bindAuth();
+this.loadData();
+},
 
- const ref=this.db.ref("users/"+user.uid);
+/* ================= AUTH ================= */
+bindAuth(){
+this.auth.onAuthStateChanged(user=>{
+if(user){
+this.state.user=user;
+auth.style.display="none";
+app.classList.remove("hidden");
 
- ref.once("value",s=>{
- if(!s.exists()) ref.set({role:"player"});
- });
+const ref=this.db.ref("users/"+user.uid);
 
- ref.on("value",s=>{
- this.state.admin=s.val().role==="admin";
- btnAdmin.classList.toggle("hidden",!this.state.admin);
- });
+ref.once("value",s=>{
+if(!s.exists()) ref.set({role:"player"});
+});
 
- }else{
- authDiv.style.display="block";
- app.classList.add("hidden");
- }
- });
- },
+ref.on("value",s=>{
+this.state.admin = s.val().role === "admin";
+btnAdmin.classList.toggle("hidden",!this.state.admin);
+});
 
- // ================= AUTH =================
- Auth:{
- login(){
- App.auth.signInWithEmailAndPassword(email.value,senha.value)
- .catch(()=>App.auth.createUserWithEmailAndPassword(email.value,senha.value));
- }
- },
+}else{
+auth.style.display="block";
+app.classList.add("hidden");
+}
+});
+},
 
- // ================= UI =================
- UI:{
- go(p){
- document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
- document.getElementById(p).classList.remove("hidden");
- }
- },
+Auth:{
+login(){
+App.auth.signInWithEmailAndPassword(email.value,senha.value)
+.catch(()=>App.auth.createUserWithEmailAndPassword(email.value,senha.value));
+}
+},
 
- // ================= TEAMS =================
- Teams:{
- create(){
- App.db.ref("teams").push({
- nome:teamName.value,
- tag:tag.value,
- players:players.value.split(","),
- owner:App.state.user.uid,
- wins:0
- });
- }
- },
+/* ================= UI ================= */
+UI:{
+go(p){
+document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
+document.getElementById(p).classList.remove("hidden");
+}
+},
 
- // ================= TOURNAMENT =================
- Tournament:{
- create(){
- if(!App.state.admin)return;
- App.db.ref("tournaments").push({nome:tournamentName.value});
- },
- bracket(){
- App.db.ref("inscricoes").once("s=>{
- const ins=Object.values(s.val()||{});
- let p=[];
- for(let i=0;i<ins.length;i+=2){
- if(ins[i+1]) p.push({t1:ins[i].team,t2:ins[i+1].team});
- }
- App.db.ref("matches").set(p);
- });
- }
- },
+/* ================= TEAMS ================= */
+Teams:{
+create(){
+App.db.ref("teams").push({
+nome:teamName.value,
+tag:tag.value,
+players:players.value.split(","),
+owner:App.state.user.uid,
+wins:0
+});
+}
+},
 
- // ================= MATCH =================
- Match:{
- create(){
- if(!App.state.admin)return;
+/* ================= MATCH ================= */
+Match:{
+create(){
+if(!App.state.admin)return alert("Apenas admin");
 
- const winner = s1.value > s2.value ? t1.value : t2.value;
+const s1v = parseInt(s1.value);
+const s2v = parseInt(s2.value);
 
- App.db.ref("history").push({
- t1:t1.value,t2:t2.value,
- map:map.value,
- s1:s1.value,s2:s2.value,
- mvp:mvp.value,
- winner
- });
+const winner = s1v > s2v ? t1.value : t2.value;
 
- App.db.ref("teams/"+winner+"/wins")
- .transaction(x=>(x||0)+1);
- }
- },
+App.db.ref("history").push({
+t1:t1.value,
+t2:t2.value,
+map:map.value,
+s1:s1v,
+s2:s2v,
+mvp:mvp.value,
+date:new Date().toLocaleString()
+});
 
- // ================= DATA =================
- loadData(){
+App.db.ref("teams/"+winner+"/wins")
+.transaction(x=>(x||0)+1);
+}
+},
 
- // teams
- this.db.ref("teams").on("value",snap=>{
- const d=snap.val()||{};
- t1.innerHTML=""; t2.innerHTML="";
- teamList.innerHTML="";
+/* ================= TOURNAMENT ================= */
+Tournament:{
+create(){
+if(!App.state.admin)return;
+App.db.ref("tournaments").push({
+nome:tournamentName.value
+});
+}
+},
 
- Object.entries(d).forEach(([id,t])=>{
- t1.innerHTML+=`<option value="${id}">${t.nome}</option>`;
- t2.innerHTML+=`<option value="${id}">${t.nome}</option>`;
- teamList.innerHTML+=`<div class="item">${t.tag} ${t.nome}</div>`;
- });
- });
+/* ================= DATA ================= */
+loadData(){
 
- // history
- this.db.ref("history").on("value",snap=>{
- const d=snap.val()||{};
- history.innerHTML="";
- Object.values(d).reverse().forEach(p=>{
- history.innerHTML+=`
- <div class="item">
- ${p.map} | ${p.s1}x${p.s2} | MVP: ${p.mvp}
- </div>`;
- });
- });
+// TIMES
+this.db.ref("teams").on("value",snap=>{
+const data=snap.val()||{};
+t1.innerHTML="";
+t2.innerHTML="";
+teamList.innerHTML="";
 
- // ranking
- this.db.ref("teams").on("value",snap=>{
- const d=Object.values(snap.val()||{}).sort((a,b)=>b.wins-a.wins);
- rank.innerHTML="";
- d.forEach((t,i)=>{
- rank.innerHTML+=`<div class="item">#${i+1} ${t.nome} - ${t.wins}</div>`;
- });
- });
+Object.entries(data).forEach(([id,t])=>{
+t1.innerHTML+=`<option value="${id}">${t.nome}</option>`;
+t2.innerHTML+=`<option value="${id}">${t.nome}</option>`;
 
- }
+if(t.owner===App.state.user?.uid){
+teamList.innerHTML+=`
+<div class="item">${t.tag} ${t.nome}</div>`;
+}
+});
+});
+
+// HISTÓRICO
+this.db.ref("history").on("value",snap=>{
+const data=snap.val()||{};
+history.innerHTML="";
+
+Object.values(data).reverse().forEach(p=>{
+history.innerHTML+=`
+<div class="item">
+${p.map} | ${p.s1}x${p.s2} | MVP: ${p.mvp}
+</div>`;
+});
+});
+
+// RANKING
+this.db.ref("teams").on("value",snap=>{
+const list=Object.values(snap.val()||{}).sort((a,b)=>b.wins-a.wins);
+rank.innerHTML="";
+
+list.forEach((t,i)=>{
+rank.innerHTML+=`
+<div class="item">
+#${i+1} ${t.nome} - ${t.wins} vitórias
+</div>`;
+});
+});
+
+}
 
 };
 
