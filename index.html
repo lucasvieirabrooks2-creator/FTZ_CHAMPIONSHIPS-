@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FTz Championship PRO</title>
+<title>FTz MASTER</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
 <style>
-body{margin:0;background:#0b0f14;color:white;font-family:Arial}
+body{margin:0;background:#0b0f14;color:#fff;font-family:Arial}
 .container{padding:15px}
 .card{background:#111827;padding:15px;border-radius:10px;margin-bottom:15px}
-input,select{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:white}
+input,select{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff}
 button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 .nav{display:flex;gap:5px;overflow:auto;margin-bottom:10px}
 .nav button{flex:1;background:#111}
@@ -29,7 +29,7 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 <!-- LOGIN -->
 <div id="auth">
 <div class="card">
-<h3>Login / Cadastro</h3>
+<h3>Login</h3>
 <input id="email" placeholder="Email">
 <input id="senha" type="password" placeholder="Senha">
 <button onclick="login()">Entrar</button>
@@ -40,17 +40,19 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 <div id="app" class="hidden">
 
 <div class="nav">
-<button onclick="show('home')">Home</button>
+<button onclick="show('feed')">Feed</button>
 <button onclick="show('torneios')">Torneios</button>
+<button onclick="show('partidas')">Partidas</button>
+<button onclick="show('ranking')">Ranking</button>
 <button onclick="show('perfil')">Perfil</button>
 <button onclick="show('admin')" id="btnAdmin" class="hidden">Admin</button>
 </div>
 
-<!-- HOME -->
-<div id="home" class="page">
+<!-- FEED -->
+<div id="feed" class="page">
 <div class="card">
 <h3>Feed</h3>
-<div id="feed"></div>
+<div id="feedList"></div>
 </div>
 </div>
 
@@ -62,11 +64,28 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 </div>
 </div>
 
+<!-- PARTIDAS -->
+<div id="partidas" class="page hidden">
+<div class="card">
+<h3>Partidas</h3>
+<div id="listaPartidas"></div>
+</div>
+</div>
+
+<!-- RANKING -->
+<div id="ranking" class="page hidden">
+<div class="card">
+<h3>Ranking</h3>
+<div id="rankingList"></div>
+</div>
+</div>
+
 <!-- PERFIL -->
 <div id="perfil" class="page hidden">
 <div class="card">
-<h3>Meu Perfil</h3>
+<h3>Perfil</h3>
 <p id="userEmail"></p>
+<p>Vitórias: <span id="wins">0</span></p>
 <button onclick="logout()">Sair</button>
 </div>
 </div>
@@ -77,21 +96,21 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 <h3>Criar Torneio</h3>
 <input id="nomeTorneio" placeholder="Nome">
 <input id="premio" placeholder="Premiação">
-<select id="modo">
-<option>Mata-mata</option>
-<option>Liga</option>
-</select>
 <button onclick="criarTorneio()">Criar</button>
 </div>
+
+<div class="card">
+<h3>Controle</h3>
+<button onclick="gerarChaveamento()">Gerar Chaveamento</button>
+</div>
 </div>
 
 </div>
-
 </div>
 
 <script>
 
-// CONFIG FIREBASE
+// CONFIG
 const firebaseConfig = {
   apiKey: "SUA_KEY",
   authDomain: "SEU_AUTH",
@@ -100,7 +119,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.database();
 
@@ -108,13 +126,13 @@ let isAdmin = false;
 
 // LOGIN
 function login(){
-    auth.signInWithEmailAndPassword(email.value, senha.value)
-    .catch(()=>auth.createUserWithEmailAndPassword(email.value, senha.value));
+auth.signInWithEmailAndPassword(email.value, senha.value)
+.catch(()=>auth.createUserWithEmailAndPassword(email.value, senha.value));
 }
 
-function logout(){ auth.signOut(); }
+function logout(){auth.signOut();}
 
-// USUÁRIO
+// USER
 auth.onAuthStateChanged(user=>{
 if(user){
 
@@ -126,13 +144,15 @@ const ref=db.ref("users/"+user.uid);
 
 ref.once("value",snap=>{
 if(!snap.exists()){
-ref.set({email:user.email, role:"player"});
+ref.set({email:user.email,wins:0,role:"player"});
 }
 });
 
 ref.on("value",snap=>{
-const data=snap.val();
-if(data.role==="admin"){
+const d=snap.val();
+wins.innerText=d.wins||0;
+
+if(d.role==="admin"){
 isAdmin=true;
 btnAdmin.classList.remove("hidden");
 }
@@ -144,26 +164,23 @@ app.classList.add("hidden");
 }
 });
 
-// NAVEGAÇÃO
+// NAV
 function show(p){
 document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
 document.getElementById(p).classList.remove("hidden");
 }
 
-// ADMIN
+// TORNEIO
 function criarTorneio(){
 if(!isAdmin) return alert("Sem permissão");
 
 db.ref("torneios").push({
 nome:nomeTorneio.value,
-premio:premio.value,
-modo:modo.value
+premio:premio.value
 });
-
-alert("Torneio criado!");
 }
 
-// LISTAR TORNEIOS
+// LISTA TORNEIOS
 db.ref("torneios").on("value",snap=>{
 const data=snap.val()||{};
 listaTorneios.innerHTML="";
@@ -172,32 +189,118 @@ Object.entries(data).forEach(([id,t])=>{
 listaTorneios.innerHTML+=`
 <div class="item">
 <b>${t.nome}</b><br>
-Premio: ${t.premio}<br>
-Modo: ${t.modo}<br>
-<button onclick="inscrever('${id}')">Participar</button>
+${t.premio}<br>
+<button onclick="inscrever('${id}')">Entrar</button>
 </div>`;
 });
 });
 
 // INSCREVER
 function inscrever(id){
-const user=auth.currentUser;
-
-db.ref("inscricoes").push({
-torneio:id,
-user:user.uid
-});
-
+const u=auth.currentUser;
+db.ref("inscricoes").push({torneio:id,user:u.uid});
 alert("Inscrito!");
 }
 
-// FEED SIMPLES
+// CHAVEAMENTO
+function gerarChaveamento(){
+if(!isAdmin) return alert("Sem permissão");
+
+db.ref("inscricoes").once("value",snap=>{
+const ins=Object.values(snap.val()||[]);
+
+let partidas=[];
+
+for(let i=0;i<ins.length;i+=2){
+if(ins[i+1]){
+partidas.push({
+p1:ins[i].user,
+p2:ins[i+1].user,
+v:null
+});
+}
+}
+
+db.ref("partidas").set(partidas);
+});
+}
+
+// LISTA PARTIDAS
+db.ref("partidas").on("value",snap=>{
+const data=snap.val()||[];
+listaPartidas.innerHTML="";
+
+data.forEach((p,i)=>{
+listaPartidas.innerHTML+=`
+<div class="item">
+${p.p1} vs ${p.p2}<br>
+<button onclick="win(${i},1)">P1</button>
+<button onclick="win(${i},2)">P2</button>
+</div>`;
+});
+});
+
+// WIN
+function win(i,p){
+const ref=db.ref("partidas/"+i);
+
+ref.once("value",snap=>{
+const d=snap.val();
+const v=p==1?d.p1:d.p2;
+
+ref.update({v});
+
+db.ref("users/"+v+"/wins").transaction(x=>(x||0)+1);
+
+avancar();
+});
+}
+
+// AVANÇAR
+function avancar(){
+db.ref("partidas").once("value",snap=>{
+const ps=snap.val()||[];
+
+const vs=ps.filter(p=>p.v).map(p=>p.v);
+
+if(vs.length<2)return;
+
+let nova=[];
+
+for(let i=0;i<vs.length;i+=2){
+if(vs[i+1]){
+nova.push({p1:vs[i],p2:vs[i+1],v:null});
+}
+}
+
+db.ref("partidas").set(nova);
+});
+}
+
+// RANKING
+db.ref("users").on("value",snap=>{
+const data=snap.val()||{};
+const list=Object.entries(data)
+.map(([id,u])=>({id,...u}))
+.sort((a,b)=>b.wins-a.wins);
+
+rankingList.innerHTML="";
+
+list.forEach((u,i)=>{
+rankingList.innerHTML+=`
+<div class="item">
+#${i+1} - ${u.wins} wins
+</div>`;
+});
+});
+
+// FEED
 db.ref("feed").on("value",snap=>{
 const data=snap.val()||{};
-feed.innerHTML="";
+feedList.innerHTML="";
 
 Object.values(data).reverse().forEach(n=>{
-feed.innerHTML+=`<div class="item">${n.texto}</div>`;
+feedList.innerHTML+=`<div class="item">${n.texto}</div>`;
 });
 });
 
