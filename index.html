@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Championship - Player Hub</title>
+    <title>FTz Championship - R6 Mobile Hub</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
         :root { --primary: #00f0ff; --bg: #05070d; --card: #111827; --danger: #ef4444; --success: #22c55e; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; }
         
         nav { background: #000; padding: 15px; display: flex; justify-content: center; gap: 15px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--primary); }
         nav button { background: none; border: none; color: #aaa; cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; }
@@ -20,21 +20,17 @@
         
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; position: relative; }
-        h1 { color: var(--primary); text-align: center; font-size: 1.5rem; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 15px; }
+        h1 { color: var(--primary); text-align: center; }
         
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn { background: var(--primary); color: #000; padding: 12px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
         
-        .atleta-list-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; cursor: pointer; transition: 0.3s; }
-        .atleta-list-item:hover { background: #1e293b; }
+        .atleta-list-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1e293b; cursor: pointer; }
         .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); margin-right: 15px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
 
-        /* Estilo do Perfil */
         .perfil-header { text-align: center; padding: 20px; background: linear-gradient(180deg, #1e293b 0%, var(--bg) 100%); border-radius: 15px; margin-bottom: 20px; }
-        .perfil-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--primary); color: var(--primary); font-size: 12px; margin-bottom: 10px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .stat-box { background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #1e293b; }
+        .label-mobile { color: #ffd700; font-size: 0.8em; font-weight: bold; margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -48,29 +44,29 @@
 
 <div class="container">
     <div id="home" class="page active">
-        <h1>FTz CHAMPIONSHIPS</h1>
+        <h1>FTz R6 MOBILE</h1>
         <div class="card" style="text-align: center;">
-            <p>Gerencie sua carreira e acompanhe o ranking da FTz Gaming.</p>
-            <button class="btn" onclick="showPage('inscricao')">CRIAR MEU PERFIL</button>
+            <p>Integração oficial com Tracker.gg para Rainbow Six Mobile.</p>
+            <button class="btn" onclick="showPage('inscricao')">CADASTRAR MEU PERFIL</button>
         </div>
     </div>
 
     <div id="inscricao" class="page">
-        <h1>NOVA CONTA</h1>
+        <h1>CADASTRO</h1>
         <div class="card">
-            <input id="atletaNome" placeholder="Seu Nickname (Ex: Shisui.FTz)">
-            <input id="ubiID" placeholder="Seu ID Ubisoft (Ex: TioWellison.FTZ)">
-            <button class="btn" onclick="inscrever()">SOLICITAR APROVAÇÃO</button>
+            <input id="atletaNome" placeholder="Nickname da FTz">
+            <input id="ubiID" placeholder="ID exato no Tracker.gg (Ex: Nickname#1234)">
+            <button class="btn" onclick="inscrever()">ENVIAR PARA ANÁLISE</button>
         </div>
     </div>
 
     <div id="atletas" class="page">
-        <h1>HALL DA FAMA</h1>
+        <h1>LINE-UP</h1>
         <div id="listaAtletas" class="card" style="padding: 0;"></div>
     </div>
 
     <div id="perfil" class="page">
-        <button onclick="showPage('atletas')" style="background:none; border:none; color:var(--primary); cursor:pointer;">← Voltar</button>
+        <button onclick="showPage('atletas')" style="background:none; border:none; color:var(--primary); cursor:pointer; padding:10px;">← Voltar</button>
         <div id="conteudoPerfil"></div>
     </div>
 
@@ -102,43 +98,29 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        const navBtn = document.getElementById('btn-' + pageId);
-        if(navBtn) navBtn.classList.add('active');
+        if(document.getElementById('btn-' + pageId)) document.getElementById('btn-' + pageId).classList.add('active');
     }
 
     function inscrever() {
         const nome = document.getElementById('atletaNome').value;
         const ubi = document.getElementById('ubiID').value;
-        if(!nome || !ubi) return alert("Preencha tudo!");
-
-        db.ref('inscricoes/').push({
-            nome: nome,
-            ubiID: ubi,
-            status: "pendente",
-            vitorias: 0,
-            derrotas: 0
-        }).then(() => {
-            alert("Pedido enviado!");
+        if(!nome || !ubi) return alert("Preencha os campos!");
+        db.ref('inscricoes/').push({ nome, ubiID: ubi, status: "pendente" }).then(() => {
+            alert("Enviado!");
             showPage('home');
         });
     }
 
-    // Gerenciar Perfis
     function abrirPerfil(id) {
         db.ref('inscricoes/' + id).once('value', (snapshot) => {
             const p = snapshot.val();
-            const container = document.getElementById('conteudoPerfil');
-            container.innerHTML = `
+            const trackerUrl = `https://tracker.gg/r6mobile/profile/ubi/${encodeURIComponent(p.ubiID)}/overview`;
+            document.getElementById('conteudoPerfil').innerHTML = `
                 <div class="perfil-header">
-                    <div class="perfil-badge">ATLETA OFICIAL</div>
-                    <h2 style="margin:5px 0;">${p.nome}</h2>
-                    <p style="color:#aaa">ID Ubisoft: ${p.ubiID}</p>
+                    <h2>${p.nome}</h2>
+                    <span class="label-mobile">ID MOBILE: ${p.ubiID}</span>
                 </div>
-                <div class="stats-grid">
-                    <div class="stat-box"><small>WINS</small><br><b style="color:var(--success)">${p.vitorias || 0}</b></div>
-                    <div class="stat-box"><small>LOSS</small><br><b style="color:var(--danger)">${p.derrotas || 0}</b></div>
-                </div>
-                <a href="https://r6.tracker.network/profile/pc/${p.ubiID}" target="_blank" class="btn" style="display:block; text-align:center; text-decoration:none;">ABRIR R6 TRACKER</a>
+                <a href="${trackerUrl}" target="_blank" class="btn">ABRIR TRACKER.GG MOBILE</a>
             `;
             showPage('perfil');
         });
@@ -148,35 +130,28 @@
         const data = snapshot.val();
         const lista = document.getElementById('listaAtletas');
         const pendentes = document.getElementById('pendentes');
-        lista.innerHTML = "";
-        pendentes.innerHTML = "<h3>Pedidos:</h3>";
+        lista.innerHTML = ""; pendentes.innerHTML = "";
 
         for (let id in data) {
             const p = data[id];
             if(p.status === "aprovado") {
-                lista.innerHTML += `
-                    <div class="atleta-list-item" onclick="abrirPerfil('${id}')">
-                        <div class="avatar">${p.nome.charAt(0)}</div>
-                        <div style="flex:1"><strong>${p.nome}</strong><br><small style="color:var(--primary)">Ver Perfil Profissional</small></div>
-                        <span>→</span>
-                    </div>`;
+                lista.innerHTML += `<div class="atleta-list-item" onclick="abrirPerfil('${id}')">
+                    <div class="avatar">R6M</div>
+                    <div style="flex:1"><strong>${p.nome}</strong><br><small>Ver Estatísticas Mobile</small></div>
+                    <span>→</span>
+                </div>`;
             } else {
-                pendentes.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <span>${p.nome}</span>
-                        <div>
-                            <button onclick="decidir('${id}', 'aprovado')" style="color:var(--success)">✓</button>
-                            <button onclick="decidir('${id}', 'recusado')" style="color:var(--danger)">X</button>
-                        </div>
-                    </div>`;
+                pendentes.innerHTML += `<div style="display:flex; justify-content:space-between; margin-top:10px;">
+                    <span>${p.nome}</span>
+                    <button onclick="decidir('${id}', 'aprovado')">✓</button>
+                </div>`;
             }
         }
     });
 
     function decidir(id, acao) {
         if(document.getElementById('adminSenha').value !== "FTZ123") return alert("Senha!");
-        if(acao === 'aprovado') db.ref('inscricoes/' + id).update({ status: 'aprovado' });
-        else db.ref('inscricoes/' + id).remove();
+        db.ref('inscricoes/' + id).update({ status: 'aprovado' });
     }
 </script>
 </body>
