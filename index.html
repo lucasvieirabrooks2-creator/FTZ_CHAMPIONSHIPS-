@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FTz Esports Official</title>
+<title>FTz Esports Master</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -13,7 +13,7 @@
 body{margin:0;background:#0b0f14;color:#fff;font-family:Arial}
 .container{padding:15px}
 .card{background:#111827;padding:15px;border-radius:10px;margin-bottom:15px}
-input,select{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;background:#000;border:1px solid #333;color:#fff}
 button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 .nav{display:flex;gap:5px;overflow:auto;margin-bottom:10px}
 .nav button{flex:1;background:#111}
@@ -49,16 +49,12 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 <div id="times" class="page">
 <div class="card">
 <h3>Criar Time</h3>
-<input id="teamName" placeholder="Nome do Time">
-<input id="tag" placeholder="TAG (ex: FTz)">
+<input id="teamName" placeholder="Nome">
+<input id="tag" placeholder="TAG">
 <textarea id="players" placeholder="5 jogadores separados por vírgula"></textarea>
-<button onclick="criarTime()">Criar Time</button>
+<button onclick="criarTime()">Criar</button>
 </div>
-
-<div class="card">
-<h3>Meus Times</h3>
-<div id="listaTimes"></div>
-</div>
+<div class="card"><h3>Meus Times</h3><div id="listaTimes"></div></div>
 </div>
 
 <!-- TORNEIOS -->
@@ -71,16 +67,37 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 
 <!-- PARTIDAS -->
 <div id="partidas" class="page hidden">
+
 <div class="card">
-<h3>Partidas</h3>
-<div id="listaPartidas"></div>
+<h3>Criar Partida</h3>
+<select id="time1"></select>
+<select id="time2"></select>
+
+<select id="mapa">
+<option>Oregon</option>
+<option>Clubhouse</option>
+<option>Bank</option>
+<option>Consulate</option>
+</select>
+
+<input id="score1" placeholder="Score 1">
+<input id="score2" placeholder="Score 2">
+<input id="mvp" placeholder="MVP">
+
+<button onclick="criarPartida()">Registrar</button>
 </div>
+
+<div class="card">
+<h3>Histórico</h3>
+<div id="historico"></div>
+</div>
+
 </div>
 
 <!-- RANKING -->
 <div id="ranking" class="page hidden">
 <div class="card">
-<h3>Ranking de Times</h3>
+<h3>Ranking</h3>
 <div id="rankingList"></div>
 </div>
 </div>
@@ -89,7 +106,7 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 <div id="admin" class="page hidden">
 <div class="card">
 <h3>Criar Torneio</h3>
-<input id="nomeTorneio" placeholder="Nome">
+<input id="nomeTorneio">
 <button onclick="criarTorneio()">Criar</button>
 </div>
 
@@ -103,7 +120,7 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 
 <script>
 
-// CONFIG
+// CONFIG FIREBASE
 const firebaseConfig = {
  apiKey:"SUA_KEY",
  authDomain:"SEU_AUTH",
@@ -184,36 +201,32 @@ listaTimes.innerHTML+=`
 <div class="item">
 <b>${t.tag} ${t.nome}</b><br>
 ${t.players.join(",")}
-<button onclick="inscrever('${id}')">Entrar em torneio</button>
+<button onclick="inscrever('${id}')">Inscrever</button>
 </div>`;
 }
 });
 });
 }
 
-// TORNEIO
+// TORNEIOS
 function criarTorneio(){
 if(!isAdmin)return;
 db.ref("torneios").push({nome:nomeTorneio.value});
 }
 
-// LISTA TORNEIOS
 db.ref("torneios").on("value",snap=>{
 const data=snap.val()||{};
 listaTorneios.innerHTML="";
 
 Object.entries(data).forEach(([id,t])=>{
-listaTorneios.innerHTML+=`
-<div class="item">
-${t.nome}
-</div>`;
+listaTorneios.innerHTML+=`<div class="item">${t.nome}</div>`;
 });
 });
 
 // INSCRIÇÃO
 function inscrever(teamId){
 db.ref("inscricoes").push({team:teamId});
-alert("Time inscrito!");
+alert("Inscrito!");
 }
 
 // CHAVEAMENTO
@@ -227,10 +240,7 @@ for(let i=0;i<ins.length;i+=2){
 if(ins[i+1]){
 partidas.push({
 t1:ins[i].team,
-t2:ins[i+1].team,
-score1:0,
-score2:0,
-winner:null
+t2:ins[i+1].team
 });
 }
 }
@@ -239,81 +249,75 @@ db.ref("partidas").set(partidas);
 });
 }
 
-// PARTIDAS
-db.ref("partidas").on("value",snap=>{
-const data=snap.val()||[];
+// SELECT TIMES
+db.ref("times").on("value",snap=>{
+const data=snap.val()||{};
+
+time1.innerHTML="";
+time2.innerHTML="";
+
+Object.entries(data).forEach(([id,t])=>{
+time1.innerHTML+=`<option value="${id}">${t.nome}</option>`;
+time2.innerHTML+=`<option value="${id}">${t.nome}</option>`;
+});
+});
+
+// PARTIDA REAL
+function criarPartida(){
+if(!isAdmin)return;
+
+const t1=time1.value;
+const t2=time2.value;
+
+const s1=parseInt(score1.value);
+const s2=parseInt(score2.value);
+
+const winner=s1>s2?t1:t2;
+
+db.ref("historico").push({
+t1,t2,
+mapa:mapa.value,
+score1:s1,
+score2:s2,
+mvp:mvp.value,
+winner,
+data:new Date().toLocaleString()
+});
+
+db.ref("times/"+winner+"/wins").transaction(x=>(x||0)+1);
+}
+
+// HISTÓRICO
+db.ref("historico").on("value",snap=>{
+const data=snap.val()||{};
 
 db.ref("times").once("value",ts=>{
 const times=ts.val()||{};
+historico.innerHTML="";
 
-listaPartidas.innerHTML="";
-
-data.forEach((p,i)=>{
-const t1=times[p.t1]?.nome||"---";
-const t2=times[p.t2]?.nome||"---";
-
-listaPartidas.innerHTML+=`
+Object.values(data).reverse().forEach(p=>{
+historico.innerHTML+=`
 <div class="item">
-${t1} ${p.score1} x ${p.score2} ${t2}<br>
-<button onclick="setWin(${i},1)">Vitória Time 1</button>
-<button onclick="setWin(${i},2)">Vitória Time 2</button>
+<b>${times[p.t1]?.nome} ${p.score1} x ${p.score2} ${times[p.t2]?.nome}</b><br>
+Mapa: ${p.mapa}<br>
+MVP: ${p.mvp}
 </div>`;
 });
 });
 });
 
-// RESULTADO
-function setWin(i,t){
-const ref=db.ref("partidas/"+i);
-
-ref.once("value",snap=>{
-const p=snap.val();
-
-const winner=t==1?p.t1:p.t2;
-
-ref.update({winner});
-
-db.ref("times/"+winner+"/wins").transaction(x=>(x||0)+1);
-
-avancar();
-});
-}
-
-// AVANÇO
-function avancar(){
-db.ref("partidas").once("value",snap=>{
-const ps=snap.val()||[];
-
-const winners=ps.filter(p=>p.winner).map(p=>p.winner);
-
-if(winners.length<2)return;
-
-let nova=[];
-
-for(let i=0;i<winners.length;i+=2){
-if(winners[i+1]){
-nova.push({t1:winners[i],t2:winners[i+1],score1:0,score2:0});
-}
-}
-
-db.ref("partidas").set(nova);
-});
-}
-
 // RANKING
 db.ref("times").on("value",snap=>{
 const data=snap.val()||{};
 
-const list=Object.entries(data)
-.map(([id,t])=>t)
-.sort((a,b)=>b.wins-a.wins);
+const list=Object.values(data).sort((a,b)=>b.wins-a.wins);
 
 rankingList.innerHTML="";
 
 list.forEach((t,i)=>{
 rankingList.innerHTML+=`
 <div class="item">
-#${i+1} ${t.tag} ${t.nome} - ${t.wins} wins
+#${i+1} ${t.tag} ${t.nome} - ${t.wins}
 </div>`;
 });
 });
