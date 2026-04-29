@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTz Championship ULTRA PRO</title>
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --bg: #05070d;
+            --card-bg: #111827;
+            --accent: #ef4444;
+        }
+        body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #fff; scroll-behavior: smooth; }
+        header { padding: 60px 20px; text-align: center; background: radial-gradient(circle at center, #1e293b 0%, #05070d 100%); border-bottom: 2px solid var(--primary); }
+        h1 { color: var(--primary); font-size: 3em; text-transform: uppercase; letter-spacing: 4px; margin: 0; }
+        .live { color: var(--accent); font-weight: bold; animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        
+        nav { display: flex; justify-content: center; gap: 20px; background: #0f172a; padding: 15px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #1e293b; }
+        nav a { color: #fff; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        nav a:hover { color: var(--primary); }
+
+        section { padding: 40px 20px; max-width: 1000px; margin: auto; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #1e293b; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .team-badge { background: #1f2937; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--primary); }
+        
+        .match { background: #020617; padding: 15px; margin: 15px 0; border-radius: 10px; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn { background: var(--primary); color: #000; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3); }
+        
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
+        .admin-box { border: 2px dashed var(--accent); padding: 20px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>FTz Championship</h1>
+    <p>Elite Rainbow Six Mobile Tournament</p>
+    <p class="live">● TRANSMISSÃO AO VIVO</p>
+</header>
+
+<nav>
+    <a href="#times">Inscrição</a>
+    <a href="#bracket">Chaveamento</a>
+    <a href="#admin">Painel de Controle</a>
+</nav>
+
+<section id="times">
+    <div class="card">
+        <h2>🛡️ Registrar Time</h2>
+        <input id="teamName" placeholder="Nome da Equipe">
+        <button class="btn" onclick="addTeam()">Confirmar Inscrição</button>
+        <div id="teams" class="grid"></div>
+    </div>
+</section>
+
+<section id="bracket">
+    <div class="card">
+        <h2>📊 Bracket de Confrontos</h2>
+        <div id="bracketList"></div>
+    </div>
+</section>
+
+<section id="admin">
+    <div class="card admin-box">
+        <h2>⚙️ Admin: Lançar Resultado</h2>
+        <p style="font-size: 0.8em; color: var(--accent);">Apenas organizadores autorizados</p>
+        <div class="grid">
+            <input id="ma" placeholder="Time A">
+            <input id="mb" placeholder="Time B">
+            <input id="msa" type="number" placeholder="Placar A">
+            <input id="msb" type="number" placeholder="Placar B">
+        </div>
+        <input type="password" id="adminPass" placeholder="Chave de Acesso">
+        <button class="btn" style="background: var(--accent)" onclick="setResult()">Finalizar Partida</button>
+    </div>
+</section>
+
+<script>
+    // Banco de dados local
+    let teams = JSON.parse(localStorage.getItem('ftz_teams')) || [];
+    let winners = JSON.parse(localStorage.getItem('ftz_winners')) || [];
+
+    function save() {
+        localStorage.setItem('ftz_teams', JSON.stringify(teams));
+        localStorage.setItem('ftz_winners', JSON.stringify(winners));
+    }
+
+    function addTeam() {
+        const input = document.getElementById('teamName');
+        if(!input.value) return alert("Digite o nome do time!");
+        
+        teams.push(input.value);
+        input.value = '';
+        save();
+        render();
+    }
+
+    function setResult() {
+        const pass = document.getElementById('adminPass').value;
+        if(pass !== 'FTZ123') return alert("Chave Admin Incorreta!");
+
+        const a = document.getElementById('ma').value;
+        const b = document.getElementById('mb').value;
+        const sa = parseInt(document.getElementById('msa').value);
+        const sb = parseInt(document.getElementById('msb').value);
+
+        if(!a || !b || isNaN(sa)) return alert("Preencha todos os campos!");
+
+        const winner = sa > sb ? a : b;
+        
+        // Remove os perdedores da lista ativa de times e adiciona o vencedor
+        // Para uma lógica de "Próxima Fase"
+        winners.push(winner);
+        alert(`Sucesso! ${winner} avançou na competição.`);
+        save();
+        render();
+    }
+
+    function render() {
+        // Renderizar lista de times
+        const teamDiv = document.getElementById('teams');
+        teamDiv.innerHTML = teams.map(t => `<div class="team-badge">${t}</div>`).join('');
+
+        // Renderizar Bracket
+        const bracketDiv = document.getElementById('bracketList');
+        bracketDiv.innerHTML = '';
+        
+        if(teams.length < 2) {
+            bracketDiv.innerHTML = "<p>Aguardando mais times para gerar confrontos...</p>";
+        }
+
+        for(let i = 0; i < teams.length; i += 2) {
+            if(teams[i+1]) {
+                bracketDiv.innerHTML += `
+                    <div class="match">
+                        <span><strong>${teams[i]}</strong></span>
+                        <span style="color:var(--primary)">VS</span>
+                        <span><strong>${teams[i+1]}</strong></span>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Inicialização
+    render();
+</script>
+
+</body>
+</html>
