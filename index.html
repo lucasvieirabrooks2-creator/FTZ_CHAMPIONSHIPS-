@@ -3,105 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTz Professional eSports Platform</title>
+    <title>FTz Tournament Platform | PRO System</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #00f0ff; --bg: #030508; --card: #0d1117; --accent: #7000ff; --win: #00ff88; --loss: #ff0055; }
-        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #e6edf3; overflow-x: hidden; }
+        :root { --primary: #00f0ff; --bg: #05070a; --card: #0d1117; --accent: #7000ff; }
+        body { margin: 0; font-family: 'Rajdhani', sans-serif; background: var(--bg); color: #fff; }
         
-        /* Menu Lateral Estilo Gamer */
-        nav { background: #000; padding: 10px; display: flex; justify-content: space-around; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
-        nav button { background: none; border: none; color: #555; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; }
-        nav button.active { color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        /* Navbar */
+        nav { background: #000; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 1000; overflow-x: auto; }
+        nav button { background: none; border: none; color: #555; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 11px; white-space: nowrap; }
+        nav button.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
 
-        .container { padding: 20px; max-width: 900px; margin: auto; }
-        .page { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .page.active { display: block; }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Widgets de Sistema */
-        .grid-system { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: var(--card); border: 1px solid #30363d; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-card span { display: block; font-size: 10px; color: #8b949e; text-transform: uppercase; }
-        .stat-card b { font-size: 20px; color: var(--primary); }
+        /* Estilo dos Cards e Inputs */
+        .card { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+        .btn-main { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-main:hover { filter: brightness(1.2); box-shadow: 0 0 15px var(--primary); }
 
-        /* Cards de Time/Jogador */
-        .profile-card { background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; transition: 0.2s; }
-        .profile-card:hover { border-color: var(--accent); background: #161b22; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
-        .verified-icon { color: var(--primary); font-size: 14px; margin-left: 5px; }
-
-        /* Tournament Manager */
-        .tourney-item { border-left: 4px solid var(--primary); background: #0d1117; padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; }
-        .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .open { background: var(--win); color: #000; }
-        .closed { background: #333; color: #fff; }
-
-        /* Form Estilizado */
-        .system-input { background: #000; border: 1px solid #30363d; color: #fff; padding: 12px; width: 100%; border-radius: 6px; margin: 8px 0; box-sizing: border-box; font-family: inherit; }
-        .btn-system { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-system:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); }
-
-        h2 { font-size: 22px; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        /* Perfil Header */
+        .p-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .p-img { width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<nav>
-    <button onclick="showPage('dash')" id="btn-dash" class="active">Painel</button>
-    <button onclick="showPage('tourneys')" id="btn-tourneys">Campeonatos</button>
-    <button onclick="showPage('teams')" id="btn-teams">Times</button>
-    <button onclick="showPage('players')" id="btn-players">Jogadores</button>
-    <button onclick="showPage('admin')" id="btn-admin">Sistema</button>
+<nav id="mainNav">
+    <button onclick="showPage('auth')" id="btn-auth" class="active">Login/Criar</button>
+    <button onclick="showPage('perfil')" id="btn-perfil" style="display:none;">Meu Perfil</button>
+    <button onclick="showPage('campeonatos')" id="btn-campeonatos">Eventos</button>
+    <button onclick="showPage('inscricao')" id="btn-inscricao">Inscrição</button>
+    <button onclick="showPage('adm')" id="btn-adm">ADM</button>
 </nav>
 
 <div class="container">
     
-    <div id="dash" class="page active">
-        <div class="grid-system">
-            <div class="stat-card"><span>Torneios</span><b id="cTourney">0</b></div>
-            <div class="stat-card"><span>Times</span><b id="cTeams">0</b></div>
-            <div class="stat-card"><span>Atletas</span><b id="cPlayers">0</b></div>
-            <div class="stat-card"><span>Premiação Total</span><b>R$ 2.5k</b></div>
+    <div id="auth" class="page active">
+        <h2>Acesso à Plataforma</h2>
+        <div class="card">
+            <h3>Entrar</h3>
+            <input id="loginUser" placeholder="Usuário/Nick">
+            <input id="loginPass" type="password" placeholder="Senha">
+            <button class="btn-main" onclick="realizarLogin()">Entrar no Sistema</button>
         </div>
-        <h2>Últimas Notificações</h2>
-        <div id="newsLog"></div>
+        <div class="card" style="border-top: 2px solid var(--accent);">
+            <h3>Criar Novo Perfil</h3>
+            <input id="regUser" placeholder="Nick de Atleta">
+            <input id="regPass" type="password" placeholder="Defina uma Senha">
+            <input id="regUbi" placeholder="ID Ubisoft (Stats)">
+            <button class="btn-main" style="background: var(--accent); color: white;" onclick="criarConta()">Cadastrar Atleta</button>
+        </div>
     </div>
 
-    <div id="tourneys" class="page">
+    <div id="perfil" class="page">
+        <h2>Passaporte do Atleta</h2>
+        <div class="card">
+            <div class="p-header">
+                <img id="pFoto" src="https://i.imgur.com/89SByG1.png" class="p-img">
+                <div>
+                    <h3 id="pNick" style="margin:0;">Atleta</h3>
+                    <small id="pStatus" style="color:var(--primary)">Status: Ativo</small>
+                </div>
+            </div>
+            <div id="pStats" style="font-size: 14px; color: #888;">
+                Ubisoft ID: <span id="pUbiID" style="color: #fff;">-</span>
+            </div>
+            <button class="btn-main" style="margin-top:20px; background:#222; color:#fff;" onclick="logout()">Sair da Conta</button>
+        </div>
+    </div>
+
+    <div id="inscricao" class="page">
+        <h2>Inscrição de Equipe</h2>
+        <div class="card">
+            <p style="font-size: 12px; color: #888;">Somente capitães podem inscrever a line-up completa.</p>
+            <select id="insSelectTorneio"></select>
+            <input id="insTime" placeholder="Nome da Equipe/Org">
+            <textarea id="insLine" placeholder="Line-up: Nick1, Nick2, Nick3, Nick4, Nick5" rows="4"></textarea>
+            <button class="btn-main" onclick="inscreverEquipe()">Finalizar Inscrição</button>
+        </div>
+    </div>
+
+    <div id="campeonatos" class="page">
         <h2>Torneios Ativos</h2>
-        <div id="tourneyList"></div>
+        <div id="listaEventos"></div>
     </div>
 
-    <div id="teams" class="page">
-        <h2>Organizações Registradas</h2>
-        <div id="teamList"></div>
-    </div>
-
-    <div id="players" class="page">
-        <h2>Base de Atletas</h2>
-        <div id="playerList"></div>
-    </div>
-
-    <div id="admin" class="page">
-        <h2>Painel de Gestão Master</h2>
-        
-        <div class="stat-card" style="text-align: left; margin-bottom: 20px;">
-            <h3>Criar Evento</h3>
-            <input id="sysTourneyName" class="system-input" placeholder="Nome do Torneio">
-            <select id="sysTourneyType" class="system-input">
-                <option value="Mata-mata">Modo: Mata-mata</option>
-                <option value="Liga">Modo: Liga (Pontos)</option>
-            </select>
-            <input id="sysTourneyPrize" class="system-input" placeholder="Premiação">
-            <button class="btn-system" onclick="sysCreateTourney()">PUBLICAR NO SISTEMA</button>
-        </div>
-
-        <div class="stat-card" style="text-align: left;">
-            <h3>Gerenciar Inscrições</h3>
-            <div id="sysPending"></div>
+    <div id="adm" class="page">
+        <h2>Painel Master</h2>
+        <div class="card">
+            <h3>Criar Torneio</h3>
+            <input id="admNomeT" placeholder="Nome do Evento">
+            <button class="btn-main" onclick="admCriarTorneio()">Publicar Evento</button>
         </div>
     </div>
 
@@ -120,6 +118,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    let usuarioLogado = null;
+
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -127,90 +127,92 @@
         document.getElementById('btn-'+id).classList.add('active');
     }
 
-    // LÓGICA DO SISTEMA
-    function sysCreateTourney() {
-        const name = document.getElementById('sysTourneyName').value;
-        if(!name) return alert("Erro: Nome vazio.");
-        db.ref('sistema/torneios').push({
-            nome: name,
-            tipo: document.getElementById('sysTourneyType').value,
-            premio: document.getElementById('sysTourneyPrize').value,
-            dataCriacao: new Date().toLocaleDateString(),
-            status: "Inscrições Abertas"
+    // SISTEMA DE CONTAS
+    function criarConta() {
+        const user = document.getElementById('regUser').value;
+        const pass = document.getElementById('regPass').value;
+        const ubi = document.getElementById('regUbi').value;
+
+        if(!user || !pass) return alert("Preencha Usuário e Senha!");
+
+        db.ref('contas/' + user).set({
+            nick: user,
+            senha: pass,
+            ubiID: ubi,
+            wins: 0,
+            foto: "https://i.imgur.com/89SByG1.png"
         }).then(() => {
-            alert("Sistema: Torneio publicado.");
-            document.getElementById('sysTourneyName').value = "";
+            alert("Perfil criado com sucesso! Agora faça login.");
+            showPage('auth');
         });
     }
 
-    function sysApprove(id) { db.ref('sistema/jogadores/'+id).update({ status: 'ativo' }); }
+    function realizarLogin() {
+        const user = document.getElementById('loginUser').value;
+        const pass = document.getElementById('loginPass').value;
 
-    // RENDERIZAÇÃO REALTIME
-    db.ref('sistema').on('value', snap => {
-        const d = snap.val() || {};
-        const torneios = d.torneios || {};
-        const jogadores = d.jogadores || {};
-        
-        // Elementos
-        const tList = document.getElementById('tourneyList');
-        const pList = document.getElementById('playerList');
-        const teamList = document.getElementById('teamList');
-        const pending = document.getElementById('sysPending');
-
-        tList.innerHTML = ""; pList.innerHTML = ""; teamList.innerHTML = ""; pending.innerHTML = "";
-        
-        let countT = 0, countP = 0;
-        const orgs = {};
-
-        // Processar Torneios
-        for(let id in torneios) {
-            countT++;
-            const t = torneios[id];
-            tList.innerHTML += `
-                <div class="tourney-item">
-                    <span class="badge-status open">Ativo</span>
-                    <h3 style="margin: 10px 0;">${t.nome}</h3>
-                    <p style="font-size: 12px; color: #888;">Modo: ${t.tipo} | Prêmio: ${t.premio}</p>
-                    <button class="btn-system" style="padding: 10px; width: auto; font-size: 10px;">VER TABELA</button>
-                </div>`;
-        }
-
-        // Processar Jogadores e Times
-        for(let id in jogadores) {
-            const p = jogadores[id];
-            if(p.status === 'pendente') {
-                pending.innerHTML += `<div class="profile-card"><span>${p.nome}</span> <button onclick="sysApprove('${id}')">APROVAR</button></div>`;
+        db.ref('contas/' + user).once('value', snap => {
+            const dados = snap.val();
+            if(dados && dados.senha === pass) {
+                usuarioLogado = dados;
+                atualizarInterfaceLogin();
+                alert("Bem-vindo, " + user + "!");
+                showPage('perfil');
             } else {
-                countP++;
-                pList.innerHTML += `
-                    <div class="profile-card">
-                        <img src="${p.foto || 'https://i.imgur.com/89SByG1.png'}" class="avatar">
-                        <div>
-                            <b>${p.nome}</b> <span class="verified-icon">✔</span>
-                            <br><small>${p.time}</small>
-                        </div>
-                    </div>`;
-                
-                if(!orgs[p.time]) orgs[p.time] = { m: 0 };
-                orgs[p.time].m++;
+                alert("Usuário ou senha incorretos!");
             }
-        }
+        });
+    }
 
-        // Renderizar Times
-        for(let nome in orgs) {
-            teamList.innerHTML += `
-                <div class="profile-card">
-                    <div style="flex-grow: 1;">
-                        <b>${nome}</b>
-                        <br><small>${orgs[nome].m} Membros Ativos</small>
-                    </div>
-                    <button style="background: none; border: 1px solid var(--primary); color: var(--primary); font-size: 9px; padding: 5px;">PERFIL DA ORG</button>
-                </div>`;
-        }
+    function atualizarInterfaceLogin() {
+        document.getElementById('btn-auth').style.display = 'none';
+        document.getElementById('btn-perfil').style.display = 'block';
+        document.getElementById('pNick').innerText = usuarioLogado.nick;
+        document.getElementById('pUbiID').innerText = usuarioLogado.ubiID || "Não informado";
+    }
 
-        document.getElementById('cTourney').innerText = countT;
-        document.getElementById('cPlayers').innerText = countP;
-        document.getElementById('cTeams').innerText = Object.keys(orgs).length;
+    function logout() {
+        usuarioLogado = null;
+        location.reload();
+    }
+
+    // SISTEMA DE INSCRIÇÃO
+    function inscreverEquipe() {
+        if(!usuarioLogado) return alert("Você precisa estar logado para se inscrever!");
+        
+        const time = document.getElementById('insTime').value;
+        const torneio = document.getElementById('insSelectTorneio').value;
+
+        db.ref('inscricoesTimes/').push({
+            time: time,
+            torneio: torneio,
+            line: document.getElementById('insLine').value,
+            responsavel: usuarioLogado.nick,
+            status: "Pendente"
+        }).then(() => alert("Inscrição enviada!"));
+    }
+
+    // ADM
+    function admCriarTorneio() {
+        const nome = document.getElementById('admNomeT').value;
+        db.ref('torneiosAtivos/').push({ nome }).then(() => alert("Torneio Criado!"));
+    }
+
+    // REALTIME SYNC
+    db.ref().on('value', snap => {
+        const d = snap.val() || {};
+        const torneios = d.torneiosAtivos || {};
+        
+        const lista = document.getElementById('listaEventos');
+        const select = document.getElementById('insSelectTorneio');
+        
+        lista.innerHTML = "";
+        select.innerHTML = "<option>Escolha o Torneio</option>";
+
+        for(let id in torneios) {
+            lista.innerHTML += `<div class="card"><b>${torneios[id].nome}</b></div>`;
+            select.innerHTML += `<option value="${torneios[id].nome}">${torneios[id].nome}</option>`;
+        }
     });
 </script>
 </body>
