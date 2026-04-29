@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FTz Esports Master</title>
+<title>FTz Pro System</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
@@ -26,92 +26,74 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 
 <div class="container">
 
+<!-- AUTH -->
 <div id="auth">
 <div class="card">
 <h3>Login</h3>
 <input id="email" placeholder="Email">
 <input id="senha" type="password">
-<button onclick="login()">Entrar</button>
+<button onclick="Auth.login()">Entrar</button>
 </div>
 </div>
 
+<!-- APP -->
 <div id="app" class="hidden">
 
 <div class="nav">
-<button onclick="show('times')">Times</button>
-<button onclick="show('torneios')">Torneios</button>
-<button onclick="show('partidas')">Partidas</button>
-<button onclick="show('ranking')">Ranking</button>
-<button onclick="show('admin')" id="btnAdmin" class="hidden">Admin</button>
+<button onclick="UI.show('times')">Times</button>
+<button onclick="UI.show('torneios')">Torneios</button>
+<button onclick="UI.show('partidas')">Partidas</button>
+<button onclick="UI.show('ranking')">Ranking</button>
+<button onclick="UI.show('admin')" id="btnAdmin" class="hidden">Admin</button>
 </div>
 
 <!-- TIMES -->
 <div id="times" class="page">
 <div class="card">
 <h3>Criar Time</h3>
-<input id="teamName" placeholder="Nome">
-<input id="tag" placeholder="TAG">
-<textarea id="players" placeholder="5 jogadores separados por vírgula"></textarea>
-<button onclick="criarTime()">Criar</button>
+<input id="teamName">
+<input id="tag">
+<textarea id="players"></textarea>
+<button onclick="Teams.create()">Criar</button>
 </div>
-<div class="card"><h3>Meus Times</h3><div id="listaTimes"></div></div>
+<div class="card"><div id="listaTimes"></div></div>
 </div>
 
 <!-- TORNEIOS -->
 <div id="torneios" class="page hidden">
-<div class="card">
-<h3>Torneios</h3>
-<div id="listaTorneios"></div>
-</div>
+<div class="card"><div id="listaTorneios"></div></div>
 </div>
 
 <!-- PARTIDAS -->
 <div id="partidas" class="page hidden">
-
 <div class="card">
-<h3>Criar Partida</h3>
 <select id="time1"></select>
 <select id="time2"></select>
-
 <select id="mapa">
 <option>Oregon</option>
 <option>Clubhouse</option>
 <option>Bank</option>
-<option>Consulate</option>
 </select>
-
-<input id="score1" placeholder="Score 1">
-<input id="score2" placeholder="Score 2">
-<input id="mvp" placeholder="MVP">
-
-<button onclick="criarPartida()">Registrar</button>
+<input id="score1">
+<input id="score2">
+<input id="mvp">
+<button onclick="Match.create()">Registrar</button>
 </div>
 
-<div class="card">
-<h3>Histórico</h3>
-<div id="historico"></div>
-</div>
-
+<div class="card"><div id="historico"></div></div>
 </div>
 
 <!-- RANKING -->
 <div id="ranking" class="page hidden">
-<div class="card">
-<h3>Ranking</h3>
-<div id="rankingList"></div>
-</div>
+<div class="card"><div id="rankingList"></div></div>
 </div>
 
 <!-- ADMIN -->
 <div id="admin" class="page hidden">
 <div class="card">
-<h3>Criar Torneio</h3>
 <input id="nomeTorneio">
-<button onclick="criarTorneio()">Criar</button>
-</div>
-
-<div class="card">
-<button onclick="gerarChaveamento()">Gerar Chaveamento</button>
+<button onclick="Tournament.create()">Criar Torneio</button>
+<button onclick="Tournament.bracket()">Gerar Chaveamento</button>
 </div>
 </div>
 
@@ -120,7 +102,7 @@ button{width:100%;padding:12px;background:#00eaff;border:none;font-weight:bold}
 
 <script>
 
-// CONFIG FIREBASE
+/* ================= CONFIG ================= */
 const firebaseConfig = {
  apiKey:"SUA_KEY",
  authDomain:"SEU_AUTH",
@@ -132,17 +114,24 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.database();
 
-let isAdmin=false;
+/* ================= STATE ================= */
+let state={
+ user:null,
+ admin:false
+};
 
-// LOGIN
-function login(){
-auth.signInWithEmailAndPassword(email.value,senha.value)
-.catch(()=>auth.createUserWithEmailAndPassword(email.value,senha.value));
-}
+/* ================= AUTH ================= */
+const Auth={
+ login(){
+ auth.signInWithEmailAndPassword(email.value,senha.value)
+ .catch(()=>auth.createUserWithEmailAndPassword(email.value,senha.value));
+ },
+ logout(){auth.signOut();}
+};
 
-// USER
 auth.onAuthStateChanged(user=>{
 if(user){
+state.user=user;
 authDiv.style.display="none";
 app.classList.remove("hidden");
 
@@ -155,152 +144,125 @@ ref.set({role:"player"});
 });
 
 ref.on("value",snap=>{
-if(snap.val().role==="admin"){
-isAdmin=true;
-btnAdmin.classList.remove("hidden");
-}
+state.admin=snap.val().role==="admin";
+btnAdmin.classList.toggle("hidden",!state.admin);
 });
 
-carregarTimes();
-
+Teams.load();
 }else{
 authDiv.style.display="block";
 app.classList.add("hidden");
 }
 });
 
-// NAV
-function show(p){
-document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
-document.getElementById(p).classList.remove("hidden");
-}
+/* ================= UI ================= */
+const UI={
+ show(p){
+ document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
+ document.getElementById(p).classList.remove("hidden");
+ }
+};
 
-// TIMES
-function criarTime(){
-const user=auth.currentUser;
+/* ================= TEAMS ================= */
+const Teams={
+ create(){
+ db.ref("times").push({
+ nome:teamName.value,
+ tag:tag.value,
+ players:players.value.split(","),
+ owner:state.user.uid,
+ wins:0
+ });
+ },
+ load(){
+ db.ref("times").on("value",snap=>{
+ const data=snap.val()||{};
+ listaTimes.innerHTML="";
+ 
+ Object.entries(data).forEach(([id,t])=>{
+ if(t.owner===state.user.uid){
+ listaTimes.innerHTML+=`
+ <div class="item">
+ ${t.tag} ${t.nome}
+ <button onclick="Tournament.join('${id}')">Inscrever</button>
+ </div>`;
+ }
+ });
+ });
+ }
+};
 
-db.ref("times").push({
-nome:teamName.value,
-tag:tag.value,
-players:players.value.split(","),
-owner:user.uid,
-wins:0
-});
-}
+/* ================= TOURNAMENT ================= */
+const Tournament={
+ create(){
+ if(!state.admin)return;
+ db.ref("torneios").push({nome:nomeTorneio.value});
+ },
+ join(teamId){
+ db.ref("inscricoes").push({team:teamId});
+ },
+ bracket(){
+ db.ref("inscricoes").once("value",snap=>{
+ const ins=Object.values(snap.val()||{});
+ let partidas=[];
+ for(let i=0;i<ins.length;i+=2){
+ if(ins[i+1]){
+ partidas.push({t1:ins[i].team,t2:ins[i+1].team});
+ }
+ }
+ db.ref("partidas").set(partidas);
+ });
+ }
+};
 
-function carregarTimes(){
-const user=auth.currentUser;
+/* ================= MATCH ================= */
+const Match={
+ create(){
+ if(!state.admin)return;
 
-db.ref("times").on("value",snap=>{
-const data=snap.val()||{};
-listaTimes.innerHTML="";
+ const t1=time1.value;
+ const t2=time2.value;
+ const s1=parseInt(score1.value);
+ const s2=parseInt(score2.value);
 
-Object.entries(data).forEach(([id,t])=>{
-if(t.owner===user.uid){
-listaTimes.innerHTML+=`
-<div class="item">
-<b>${t.tag} ${t.nome}</b><br>
-${t.players.join(",")}
-<button onclick="inscrever('${id}')">Inscrever</button>
-</div>`;
-}
-});
-});
-}
+ const winner=s1>s2?t1:t2;
 
-// TORNEIOS
-function criarTorneio(){
-if(!isAdmin)return;
-db.ref("torneios").push({nome:nomeTorneio.value});
-}
+ db.ref("historico").push({
+ t1,t2,mapa:mapa.value,
+ score1:s1,score2:s2,
+ mvp:mvp.value,
+ winner
+ });
 
-db.ref("torneios").on("value",snap=>{
-const data=snap.val()||{};
-listaTorneios.innerHTML="";
+ db.ref("times/"+winner+"/wins")
+ .transaction(x=>(x||0)+1);
+ }
+};
 
-Object.entries(data).forEach(([id,t])=>{
-listaTorneios.innerHTML+=`<div class="item">${t.nome}</div>`;
-});
-});
-
-// INSCRIÇÃO
-function inscrever(teamId){
-db.ref("inscricoes").push({team:teamId});
-alert("Inscrito!");
-}
-
-// CHAVEAMENTO
-function gerarChaveamento(){
-db.ref("inscricoes").once("value",snap=>{
-const ins=Object.values(snap.val()||{});
-
-let partidas=[];
-
-for(let i=0;i<ins.length;i+=2){
-if(ins[i+1]){
-partidas.push({
-t1:ins[i].team,
-t2:ins[i+1].team
-});
-}
-}
-
-db.ref("partidas").set(partidas);
-});
-}
+/* ================= DATA LOAD ================= */
 
 // SELECT TIMES
 db.ref("times").on("value",snap=>{
 const data=snap.val()||{};
-
 time1.innerHTML="";
 time2.innerHTML="";
-
 Object.entries(data).forEach(([id,t])=>{
 time1.innerHTML+=`<option value="${id}">${t.nome}</option>`;
 time2.innerHTML+=`<option value="${id}">${t.nome}</option>`;
 });
 });
 
-// PARTIDA REAL
-function criarPartida(){
-if(!isAdmin)return;
-
-const t1=time1.value;
-const t2=time2.value;
-
-const s1=parseInt(score1.value);
-const s2=parseInt(score2.value);
-
-const winner=s1>s2?t1:t2;
-
-db.ref("historico").push({
-t1,t2,
-mapa:mapa.value,
-score1:s1,
-score2:s2,
-mvp:mvp.value,
-winner,
-data:new Date().toLocaleString()
-});
-
-db.ref("times/"+winner+"/wins").transaction(x=>(x||0)+1);
-}
-
 // HISTÓRICO
 db.ref("historico").on("value",snap=>{
 const data=snap.val()||{};
-
 db.ref("times").once("value",ts=>{
 const times=ts.val()||{};
 historico.innerHTML="";
-
 Object.values(data).reverse().forEach(p=>{
 historico.innerHTML+=`
 <div class="item">
-<b>${times[p.t1]?.nome} ${p.score1} x ${p.score2} ${times[p.t2]?.nome}</b><br>
-Mapa: ${p.mapa}<br>
-MVP: ${p.mvp}
+${times[p.t1]?.nome} ${p.score1}x${p.score2} ${times[p.t2]?.nome}
+<br>Mapa: ${p.mapa} | MVP: ${p.mvp}
 </div>`;
 });
 });
@@ -309,11 +271,8 @@ MVP: ${p.mvp}
 // RANKING
 db.ref("times").on("value",snap=>{
 const data=snap.val()||{};
-
 const list=Object.values(data).sort((a,b)=>b.wins-a.wins);
-
 rankingList.innerHTML="";
-
 list.forEach((t,i)=>{
 rankingList.innerHTML+=`
 <div class="item">
@@ -323,6 +282,5 @@ rankingList.innerHTML+=`
 });
 
 </script>
-
 </body>
 </html>
